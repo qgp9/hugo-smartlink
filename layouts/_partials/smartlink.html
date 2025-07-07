@@ -27,6 +27,17 @@
         {{- $anchor := or (index $parts 1) "" -}}
         {{- $anchorHead := and $anchor "#" -}}
         {{- if and $stripNamespace (not $hasLabel) -}}
+            {{- $label = strings.TrimPrefix "-" $label -}}
+        {{- end -}}
+        {{- with site.Params.smartLinkOptions.prefixAlias -}}
+            {{- range $key, $value := . -}}
+                {{- if hasPrefix $main $key -}}
+                    {{- $main = replace $main $key $value -}}
+                    {{- break -}}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+        {{- if and $stripNamespace (not $hasLabel) -}}
             {{- $label = replaceRE "^.*/" "" $label -}}
         {{- end -}}
         {{- $page := site.GetPage (urlize (lower $main)) -}}
