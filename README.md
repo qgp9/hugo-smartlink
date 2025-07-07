@@ -61,6 +61,26 @@ params:
   - ❌ Hugo's link render hooks are not applied
   - You need to handle external links, security attributes manually
 
+### Prefix Alias Configuration
+
+You can map namespace prefixes to different paths using `prefixAlias`:
+
+```yaml
+params:
+  smartLinkOptions:
+    output: markdown
+    prefixAlias:
+      "~": "/doc/"
+      "docs:": "/documentation/"
+      "api:": "/api-docs/"
+```
+
+**Examples:**
+- `[[~/About]]` → `[About](/doc/about)`
+- `[[docs:Guide]]` → `[Guide](/documentation/guide)`
+- `[[api:User]]` → `[User](/api-docs/user)`
+- `[[/About]]` → `[About](/about)` (no prefix alias)
+
 ## Usage
 
 ### 1. Configure Smart Links
