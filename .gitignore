@@ -30,3 +30,8 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+.markdownlint.yml
+/public
+/test/tmp-test-site
+/.backup
+.hugo_build.lock
