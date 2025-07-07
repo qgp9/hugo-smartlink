@@ -1,6 +1,19 @@
+<!-- omit from toc -->
 # hugo-smartlink
 
 A Hugo module that provides smart link functionality for Hugo sites. This module automatically converts `[[link]]` syntax into proper HTML links based on configurable patterns and rules.
+
+<!-- omit from toc -->
+## Table of Contents
+
+- [Features](#features)
+- [Install](#install)
+- [Configuration](#configuration)
+  - [Output Type Configuration](#output-type-configuration)
+  - [Prefix Alias Configuration](#prefix-alias-configuration)
+- [Usage](#usage)
+  - [1. Configure Smart Links](#1-configure-smart-links)
+  - [2. Use Smart Links in Content](#2-use-smart-links-in-content)
 
 ## Features
 
@@ -76,6 +89,7 @@ params:
 ```
 
 **Examples:**
+
 - `[[~/About]]` → `[About](/doc/about)`
 - `[[docs:Guide]]` → `[Guide](/documentation/guide)`
 - `[[api:User]]` → `[User](/api-docs/user)`
@@ -116,128 +130,4 @@ params:
 
 Write your content using the `[[link]]` syntax:
 
-```markdown
-# My Documentation
-
-Here are some examples of smart links:
-
-- [[Getting Started#installation]] - Links to a section in "Getting Started" page
-- [[TIL-1309]] - Links to a JIRA ticket
-- [[TIL-1309#215234]] - Links to a specific JIRA comment
-- [[-/About]] - Links to the About page (with namespace stripping)
-- [[/Portal]] - Links to the Portal page
 ```
-
-## Configuration Options
-
-### Link Rule Properties
-
-Each link rule in `smartWikiLinks` can have the following properties:
-
-- **`name`**: A descriptive name for the rule
-- **`pattern`**: Regex pattern to match links (optional for wiki links)
-- **`url`**: URL template with placeholders like `{0}`, `{1}`, etc.
-- **`label`**: Label template for the link text
-- **`class`**: CSS classes to apply to the link (only used when `output: html`)
-- **`wikiLink`**: Set to `true` for internal wiki-style links
-- **`stripNamespace`**: Set to `true` to strip namespace prefixes (like `-`)
-
-### Pattern Matching
-
-- `{0}`: The entire matched string
-- `{1}`, `{2}`, etc.: Captured groups from the regex pattern
-- Use `{0}` for the full match or numbered groups for specific parts
-
-## Examples
-
-| Source | Rule | Output |
-|:-------|:----:|:------:|
-| `[[TIL-1309]]` | JIRA | `[TIL-1309](https://example.com/browse/TIL-1309)` |
-| `[[TIL-1309#215234]]` | JIRA Comment | `[TIL-1309#215234](https://example.com/browse/TIL-1309?focusedId=215234#comment-215234)` |
-| `[[TIL-1309#215234 \| myJira]]` | JIRA Comment | `[myJira](https://example.com/browse/TIL-1309?focusedId=215234#comment-215234)` |
-| `[[Getting Started#installation]]` | WikiLink | `[Getting Started#installation](getting-started#installation)` |
-| `[[-/About]]` | WikiLink | `[About](/about)` |
-
-### HTML Output Examples
-
-When using `output: html`, the same links generate HTML `<a>` tags with classes:
-
-```html
-<!-- [[TIL-1309]] with class: external jira-link -->
-<a href="https://example.com/browse/TIL-1309" class="external jira-link">TIL-1309</a>
-
-<!-- [[-/About]] with class: wikilink -->
-<a href="/about" class="wikilink">About</a>
-```
-
-## Advanced Usage
-
-### Custom Link Labels
-
-You can specify custom labels using the pipe syntax:
-
-```markdown
-[[TIL-1309|Custom JIRA Link]]
-```
-
-This will use "Custom JIRA Link" as the link text instead of the default.
-
-### Namespace Handling
-
-For wiki links with namespaces:
-
-```markdown
-[[-/About]]  # Links to /about with label "About"
-[[/About]]   # Links to /about with label "/About"
-```
-
-### Fallback Links
-
-Configure a default rule to handle unmatched links:
-
-```yaml
-- name: "default"
-  pattern: "^.*$"
-  url: "/broken-link/"
-  class: "broken-link"
-```
-
-## How It Works
-
-1. **Content Processing**: The module processes your content and looks for `[[link]]` patterns
-2. **Pattern Matching**: Each link is matched against configured patterns in order
-3. **Link Generation**: Based on the matched rule, it generates the appropriate HTML link
-4. **Caching**: Links are cached for performance
-
-## File Structure
-
-```text
-hugo-smartlink/
-├── go.mod                    # Go module definition
-├── layouts/
-│   ├── _partials/
-│   │   ├── content.html      # Main content template
-│   │   ├── content-smartlink.html  # Smart link processing
-│   │   └── smartlink.html    # Link generation logic
-│   └── _shortcodes/
-│       └── smartlink.html    # Shortcode for manual link generation
-├── LICENSE                   # License file
-└── README.md                # This file
-```
-
-## Requirements
-
-- Hugo 0.80.0 or later
-- Go 1.16 or later
-
-## License
-
-This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Support
-
-If you encounter any issues or have questions, please open an issue on the GitHub repository.
