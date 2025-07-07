@@ -1,0 +1,4 @@
+{{- .RenderString 
+    (replaceRE `\\(\[[[^]]*]])` `$1` (
+        replaceRE `(^|[^\\])\[\[([^]]+)]]` "$1{{% smartlink `$2` %}}" .RawContent)) 
+-}}

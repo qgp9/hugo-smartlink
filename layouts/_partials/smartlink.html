@@ -1,0 +1,53 @@
+{{- $linkTextOrg := . -}}
+{{- $linkText := $linkTextOrg | strings.TrimPrefix "[[" | strings.TrimSuffix "]]" | strings.TrimSpace -}}
+{{- $linkParts := split $linkText "|" -}}
+{{- $path := index $linkParts 0 | strings.TrimSpace -}}
+{{- $hasLabel := or (strings.TrimSpace (index $linkParts 1)) false -}}
+{{- $label := strings.TrimSpace (or $hasLabel $path) -}}
+{{- $matched := false -}}
+{{- range site.Params.smartWikiLinks -}}
+    {{- $match := slice $path -}}
+    {{- if .pattern -}}
+        {{- $match = index (findRESubmatch .pattern $path) 0 -}}
+        {{- if not $match -}}
+            {{- $matched := false -}}
+            {{- continue -}}
+        {{- end -}}
+    {{- end -}}
+    {{- $matched := true -}}
+    {{- if .wikiLink -}}
+        {{- $stripNamespace := hasPrefix $path "~" -}}
+        {{- $path = strings.TrimPrefix "~" $path  -}}
+        {{- $parts := split $path "#" -}}
+        {{- $main := index $parts 0 -}}
+        {{- $anchor := or (index $parts 1) "" -}}
+        {{- $anchorHead := and $anchor "#" -}}
+        {{- $page := site.GetPage (urlize (lower $main)) -}}
+        {{- if not $page -}}
+            {{- $matched = false -}}
+            {{- continue -}}
+        {{- end -}}
+        {{- $path = (print $page.RelPermalink $anchorHead $anchor) -}}
+        {{- if and $stripNamespace (not $hasLabel) -}}
+          {{- $label = replaceRE "^.*/" "" $label -}}
+        {{- end -}}
+    {{- end -}}
+    {{ if .url -}}
+        {{- $url := .url -}}
+        {{- range $i, $val := $match -}}
+            {{- $url = replace $url (printf "{%d}" $i) $val -}}
+        {{- end -}}
+        {{- $path = $url -}}
+    {{- end -}}
+    {{- if and .label (not $hasLabel) -}}
+        {{- $label = .label -}}
+        {{- range $i, $val := $match -}}
+            {{- $label = replace $label (printf "{%d}" $i) $val -}}
+        {{- end -}}
+    {{- end -}}
+    {{- if $matched -}}
+        {{- break -}}
+    {{- end -}}
+{{- end -}}
+[{{$label}}]({{$path}})
+{{- /* remove trailing */ -}}
