@@ -1,13 +1,39 @@
 {{- $linkTextOrg := . -}}
 {{- $linkText := $linkTextOrg | strings.TrimPrefix "[[" | strings.TrimSuffix "]]" | strings.TrimSpace -}}
-{{- $linkParts := split $linkText "|" -}}
-{{- $path := index $linkParts 0 | strings.TrimSpace -}}
-{{- $hasLabel := or (strings.TrimSpace (index $linkParts 1)) false -}}
+
+{{- /* split link text into path */ -}}
+{{- $_linkParts := split $linkText "|" -}}
+{{- $path := index $_linkParts 0 | strings.TrimSpace -}}
+
+{{- /* Check inline "stripNamespace" prefix*/ -}}
+{{- $stripNamespace := hasPrefix $path "-" -}}
+{{- if $stripNamespace -}}
+    {{- $path = strings.TrimPrefix "-" $path  -}}
+{{- end -}}
+
+{{- /* Check prefixAlias */ -}}
+{{- with site.Params.smartLinkOptions.prefixAlias -}}
+    {{- range $key, $value := . -}}
+        {{- if hasPrefix $path $key -}}
+            {{- $path = replace $path $key $value -}}
+            {{- break -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{- /* Set label */ -}}
+{{- $hasLabel := or (strings.TrimSpace (index $_linkParts 1)) false -}}
 {{- $label := strings.TrimSpace (or $hasLabel $path) -}}
-{{- $matched := false -}}
+
+{{- /* Initialize Variables */ -}}
 {{- $class := "" -}}
+
+{{- /* Loop through smartWikiLinks */}}
+{{- $matched := false -}}
 {{- range site.Params.smartWikiLinks -}}
     {{- $match := slice $path -}}
+    {{- /* If pattern is not set, match any path */ -}}
+    {{- /* if not matched, early continue */ -}}
     {{- if .pattern -}}
         {{- $match = index (findRESubmatch .pattern $path) 0 -}}
         {{- if not $match -}}
@@ -15,28 +41,14 @@
             {{- continue -}}
         {{- end -}}
     {{- end -}}
+    {{- /* Now matched */ -}}
     {{- $matched := true -}}
-    {{- if .class -}}
-        {{- $class = .class -}}
-    {{- end -}}
     {{- if .wikiLink -}}
-        {{- $stripNamespace := or .stripNamespace (hasPrefix $path "-") -}}
-        {{- $path = strings.TrimPrefix "-" $path  -}}
-        {{- $parts := split $path "#" -}}
-        {{- $main := index $parts 0 -}}
-        {{- $anchor := or (index $parts 1) "" -}}
+        {{- $stripNamespace = or .stripNamespace $stripNamespace -}}
+        {{- $_parts := split $path "#" -}}
+        {{- $main := index $_parts 0 -}}
+        {{- $anchor := or (index $_parts 1) "" -}}
         {{- $anchorHead := and $anchor "#" -}}
-        {{- if and $stripNamespace (not $hasLabel) -}}
-            {{- $label = strings.TrimPrefix "-" $label -}}
-        {{- end -}}
-        {{- with site.Params.smartLinkOptions.prefixAlias -}}
-            {{- range $key, $value := . -}}
-                {{- if hasPrefix $main $key -}}
-                    {{- $main = replace $main $key $value -}}
-                    {{- break -}}
-                {{- end -}}
-            {{- end -}}
-        {{- end -}}
         {{- if and $stripNamespace (not $hasLabel) -}}
             {{- $label = replaceRE "^.*/" "" $label -}}
         {{- end -}}
@@ -48,11 +60,10 @@
         {{- $path = (print $page.RelPermalink $anchorHead $anchor) -}}
     {{- end -}}
     {{ if .url -}}
-        {{- $url := .url -}}
+        {{- $path = .url -}}
         {{- range $i, $val := $match -}}
-            {{- $url = replace $url (printf "{%d}" $i) $val -}}
+            {{- $path = replace $path (printf "{%d}" $i) $val -}}
         {{- end -}}
-        {{- $path = $url -}}
     {{- end -}}
     {{- if and .label (not $hasLabel) -}}
         {{- $label = .label -}}
@@ -61,6 +72,7 @@
         {{- end -}}
     {{- end -}}
     {{- if $matched -}}
+        {{- if .class -}} {{- $class = .class -}} {{- end -}}
         {{- break -}}
     {{- end -}}
 {{- end -}}
