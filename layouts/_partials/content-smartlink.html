@@ -1,4 +1,6 @@
+{{- $output := site.Params.smartLinkOptions.output | default "markdown" -}}
+{{- $shortcode := cond (eq $output "html") "{{< smartlink `$2` >}}" "{{% smartlink `$2` %}}" -}}
 {{- .RenderString 
-    (replaceRE `\\(\[[[^]]*]])` `$1` (
-        replaceRE `(^|[^\\])\[\[([^]]+)]]` "$1{{% smartlink `$2` %}}" .RawContent)) 
+    (replaceRE `\\(\[\[[^]]*]])` `$1` (
+        replaceRE `(^|[^\\])\[\[([^]]+)]]` (printf "$1%s" $shortcode) .RawContent)) 
 -}}

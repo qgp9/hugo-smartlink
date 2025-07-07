@@ -5,6 +5,7 @@
 {{- $hasLabel := or (strings.TrimSpace (index $linkParts 1)) false -}}
 {{- $label := strings.TrimSpace (or $hasLabel $path) -}}
 {{- $matched := false -}}
+{{- $class := "" -}}
 {{- range site.Params.smartWikiLinks -}}
     {{- $match := slice $path -}}
     {{- if .pattern -}}
@@ -15,6 +16,9 @@
         {{- end -}}
     {{- end -}}
     {{- $matched := true -}}
+    {{- if .class -}}
+        {{- $class = .class -}}
+    {{- end -}}
     {{- if .wikiLink -}}
         {{- $stripNamespace := hasPrefix $path "~" -}}
         {{- $path = strings.TrimPrefix "~" $path  -}}
@@ -49,5 +53,10 @@
         {{- break -}}
     {{- end -}}
 {{- end -}}
+{{- $output := site.Params.smartLinkOptions.output | default "markdown" -}}
+{{- if eq $output "html" -}}
+<a href="{{$path}}"{{if $class}} class="{{$class}}"{{end}}>{{$label}}</a>
+{{- else -}}
 [{{$label}}]({{$path}})
+{{- end -}}
 {{- /* remove trailing */ -}}
