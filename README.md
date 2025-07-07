@@ -104,7 +104,7 @@ Here are some examples of smart links:
 - [[Getting Started#installation]] - Links to a section in "Getting Started" page
 - [[TIL-1309]] - Links to a JIRA ticket
 - [[TIL-1309#215234]] - Links to a specific JIRA comment
-- [[~/About]] - Links to the About page (with namespace stripping)
+- [[-/About]] - Links to the About page (with namespace stripping)
 - [[/Portal]] - Links to the Portal page
 ```
 
@@ -120,7 +120,7 @@ Each link rule in `smartWikiLinks` can have the following properties:
 - **`label`**: Label template for the link text
 - **`class`**: CSS classes to apply to the link (only used when `output: html`)
 - **`wikiLink`**: Set to `true` for internal wiki-style links
-- **`stripNamespace`**: Set to `true` to strip namespace prefixes (like `~`)
+- **`stripNamespace`**: Set to `true` to strip namespace prefixes (like `-`)
 
 ### Pattern Matching
 
@@ -136,7 +136,7 @@ Each link rule in `smartWikiLinks` can have the following properties:
 | `[[TIL-1309#215234]]` | JIRA Comment | `[TIL-1309#215234](https://example.com/browse/TIL-1309?focusedId=215234#comment-215234)` |
 | `[[TIL-1309#215234 \| myJira]]` | JIRA Comment | `[myJira](https://example.com/browse/TIL-1309?focusedId=215234#comment-215234)` |
 | `[[Getting Started#installation]]` | WikiLink | `[Getting Started#installation](getting-started#installation)` |
-| `[[~/About]]` | WikiLink | `[About](/about)` |
+| `[[-/About]]` | WikiLink | `[About](/about)` |
 
 ### HTML Output Examples
 
@@ -146,7 +146,7 @@ When using `output: html`, the same links generate HTML `<a>` tags with classes:
 <!-- [[TIL-1309]] with class: external jira-link -->
 <a href="https://example.com/browse/TIL-1309" class="external jira-link">TIL-1309</a>
 
-<!-- [[~/About]] with class: wikilink -->
+<!-- [[-/About]] with class: wikilink -->
 <a href="/about" class="wikilink">About</a>
 ```
 
@@ -167,7 +167,7 @@ This will use "Custom JIRA Link" as the link text instead of the default.
 For wiki links with namespaces:
 
 ```markdown
-[[~/About]]  # Links to /about with label "About"
+[[-/About]]  # Links to /about with label "About"
 [[/About]]   # Links to /about with label "/About"
 ```
 

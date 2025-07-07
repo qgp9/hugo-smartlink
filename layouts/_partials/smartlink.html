@@ -20,21 +20,21 @@
         {{- $class = .class -}}
     {{- end -}}
     {{- if .wikiLink -}}
-        {{- $stripNamespace := hasPrefix $path "~" -}}
-        {{- $path = strings.TrimPrefix "~" $path  -}}
+        {{- $stripNamespace := or .stripNamespace (hasPrefix $path "-") -}}
+        {{- $path = strings.TrimPrefix "-" $path  -}}
         {{- $parts := split $path "#" -}}
         {{- $main := index $parts 0 -}}
         {{- $anchor := or (index $parts 1) "" -}}
         {{- $anchorHead := and $anchor "#" -}}
+        {{- if and $stripNamespace (not $hasLabel) -}}
+            {{- $label = replaceRE "^.*/" "" $label -}}
+        {{- end -}}
         {{- $page := site.GetPage (urlize (lower $main)) -}}
         {{- if not $page -}}
             {{- $matched = false -}}
             {{- continue -}}
         {{- end -}}
         {{- $path = (print $page.RelPermalink $anchorHead $anchor) -}}
-        {{- if and $stripNamespace (not $hasLabel) -}}
-          {{- $label = replaceRE "^.*/" "" $label -}}
-        {{- end -}}
     {{- end -}}
     {{ if .url -}}
         {{- $url := .url -}}
