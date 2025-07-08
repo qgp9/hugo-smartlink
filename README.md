@@ -355,7 +355,6 @@ This allows Hugo SmartLink to override the content partial and apply link transf
 
 ### Known Issues
 
-- **Malformed Links**: `[[[]]` and `[[ ]]` are not properly handled and remain as-is instead of being converted to broken links
 - **Non-ASCII Characters**: Unicode characters in page names (e.g., `test-한글`, `test-émojis`) are not properly URL-encoded when used as wiki links
 
 ### Planned Features

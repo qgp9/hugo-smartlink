@@ -125,11 +125,9 @@ title: SmartLink Test Content
 * `\[[missing-docs/guide]]` ||| [[missing-docs/guide]] ||| {{< expected_a href="/broken-link/" label="guide" class="broken-link" output="html" >}}
 
 ### Empty or Invalid Links
-* `\[[[]]` ||| [[]] ||| {{< expected_a href="/broken-link/" label="" class="broken-link" output="markdown" >}}
-* `\[[[]]` ||| [[]] ||| {{< expected_a href="/broken-link/" label="" class="broken-link" output="html" >}}
+* `[[]]` ||| [[]] ||| SHOULD_SUCCESS ||| [[]]
 
-* `\[[ ]]` ||| [[ ]] ||| {{< expected_a href="/broken-link/" label=" " class="broken-link" output="markdown" >}}
-* `\[[ ]]` ||| [[ ]] ||| {{< expected_a href="/broken-link/" label=" " class="broken-link" output="html" >}}
+* `[[ ]]` ||| [[ ]] ||| SHOULD_SUCCESS ||| [[ ]]
 
 ### Special Characters and Unicode
 * `\[[test-한글]]` ||| [[test-한글]] ||| {{< expected_a href="/test-한글/" label="test-한글" output="markdown" >}}

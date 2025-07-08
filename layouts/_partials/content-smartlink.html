@@ -2,5 +2,5 @@
 {{- $shortcode := cond (eq $output "html") "{{< smartlink `$2` >}}" "{{% smartlink `$2` %}}" -}}
 {{- .RenderString 
     (replaceRE `\\(\[\[[^]]*]])` `$1` (
-        replaceRE `(^|[^\\])\[\[([^]]+)]]` (printf "$1%s" $shortcode) .RawContent)) 
+        replaceRE `(^|[^\\])\[\[(\s*[^]\s][^]]*)]]` (printf "$1%s" $shortcode) .RawContent)) 
 -}}

@@ -100,10 +100,10 @@ run_test() {
                 # Clean up the parts (remove leading/trailing whitespace)
                 converted=$(echo "$converted" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
                 should_result=$(echo "$should_result" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-                expected_result=$(echo "$expected_result" | sed 's/^.*<a/<a/;s/a>.*$/a>/')
+                expected_result=$(echo "$expected_result" | sed 's/^.*<a/<a/;s/a>.*$/a>/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
                 
                 # Clean up src_literal: remove <p><code>...</code></p> or <code>...</code> and decode HTML entities
-                src_literal_clean=$(echo "$src_literal" | sed -E 's#^<p><code>(.*)</code></p>$#\1#' | sed -E 's#^<code>(.*)</code>$#\1#')
+                src_literal_clean=$(echo "$src_literal" | sed -E 's#^.*<code>(.*)</code>.*$#\1#')
                 src_literal_clean=$(echo "$src_literal_clean" | sed 's/&lt;/</g; s/&gt;/>/g; s/&quot;/\"/g; s/&amp;/\&/g')
                 
                 # Remove <code> tags from converted and expected_result
