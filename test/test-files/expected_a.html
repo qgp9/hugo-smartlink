@@ -8,9 +8,9 @@
 {{- $should_result := or (and $same_output "SHOULD_SUCCESS") "SHOULD_FAIL" -}}
 
 {{- if eq $expected_output "markdown" -}}
-    {{- $should_result }} ||| <a href="{{ $href }}">{{ $label }}</a>
+    {{- $should_result }} ||| <a href="{{ $href | safeURL }}">{{ $label }}</a>
 {{- else if eq $expected_output "html" -}}
-    {{- $should_result }} ||| <a href="{{ $href }}" class="{{ $class }}">{{ $label }}</a>
+    {{- $should_result }} ||| <a href="{{ $href | safeURL }}" class="{{ $class }}">{{ $label }}</a>
 {{- else -}}
     {{- $should_result }} ||| "ERROR_WRONG_TEST_INPUT"
 {{- end -}} 

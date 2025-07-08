@@ -355,8 +355,6 @@ This allows Hugo SmartLink to override the content partial and apply link transf
 
 ### Known Issues
 
-- **Non-ASCII Characters**: Unicode characters in page names (e.g., `test-한글`, `test-émojis`) are not properly URL-encoded when used as wiki links
-
 ### Planned Features
 
 - **Better Error Handling**: Improve handling of malformed wiki link syntax

@@ -41,11 +41,10 @@ run_test() {
     QUIET="--quiet"
     if [ "$verbose" = "1" ]; then
         QUIET=""
+        set -x
     fi
     cd "$test_dir_abs"
-    set -x
     HUGO_MODULE_REPLACEMENTS="$HUGO_MODULE_REPLACEMENTS" hugo build --config "$config_file_abs" $QUIET
-    set +x
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Hugo build failed for $test_name${NC}"
         if [[ "$test_name" == *"Markdown"* ]]; then
@@ -57,6 +56,7 @@ run_test() {
         cd ..
         return 1
     fi
+    set +x
     
     # Find the test file
     TEST_FILE="public/docs/test/index.html"

@@ -64,7 +64,7 @@
             {{- end -}}
         {{- else -}}
             {{- $main = strings.ReplaceRE `/+` "/" $main -}}
-            {{- $page := site.GetPage (urlize (lower $main)) -}}
+            {{- $page := site.GetPage (replaceRE `\s+` "-" $main | lower) -}}
             {{- if not $page -}}
                 {{- $matched = false -}}
                 {{- continue -}}

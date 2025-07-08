@@ -130,11 +130,11 @@ title: SmartLink Test Content
 * `[[ ]]` ||| [[ ]] ||| SHOULD_SUCCESS ||| [[ ]]
 
 ### Special Characters and Unicode
-* `\[[test-한글]]` ||| [[test-한글]] ||| {{< expected_a href="/test-한글/" label="test-한글" output="markdown" >}}
-* `\[[test-한글]]` ||| [[test-한글]] ||| {{< expected_a href="/test-한글/" label="test-한글" class="wikilink" output="html" >}}
+* `\[[test-한글]]` ||| [[test-한글]] ||| {{< expected_a href="/test-%ED%95%9C%EA%B8%80/" label="test-한글" output="markdown" >}}
+* `\[[test-한글]]` ||| [[test-한글]] ||| {{< expected_a href="/test-%ED%95%9C%EA%B8%80/" label="test-한글" class="wikilink" output="html" >}}
 
-* `\[[test-émojis]]` ||| [[test-émojis]] ||| {{< expected_a href="/test-émojis/" label="test-émojis" output="markdown" >}}
-* `\[[test-émojis]]` ||| [[test-émojis]] ||| {{< expected_a href="/test-émojis/" label="test-émojis" class="wikilink" output="html" >}}
+* `\[[test-émojis]]` ||| [[test-émojis]] ||| {{< expected_a href="/test-%C3%A9mojis/" label="test-émojis" output="markdown" >}}
+* `\[[test-émojis]]` ||| [[test-émojis]] ||| {{< expected_a href="/test-%C3%A9mojis/" label="test-émojis" class="wikilink" output="html" >}}
 
 ### Numbers and Mixed Content
 * `\[[page-123]]` ||| [[page-123]] ||| {{< expected_a href="/page-123/" label="page-123" output="markdown" >}}
