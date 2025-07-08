@@ -2,23 +2,36 @@
 # Hugo SmartLink
 
 [![Hugo version](https://img.shields.io/badge/hugo-0.127.0-blue.svg)](https://gohugo.io/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/qgp9/hugo-smartlink/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/qgp9/hugo-smartlink/blob/main/LICENSE)
 
-A Hugo module that provides smart link functionality for Hugo sites. This module automatically converts `[[link]]` syntax into proper HTML links based on configurable patterns and rules.
+> ⚠️ **Disclaimer**: This README was mostly written by an LLM (thanks, AI!) and hasn't been thoroughly fact-checked. Proceed with caution and a sense of humor 😄  
+> *Even this disclaimer sentence was written by an LLM - we're going full meta here!*
 
-<!-- omit from toc -->
-## Features
+A Hugo module that provides **wiki link** functionality for Hugo static sites. This module automatically converts `[[wikilink]]` syntax into proper HTML links.
 
-- 🔗 **Wiki Link Detection**: Automatically detects and converts `[[link]]` syntax
+## What is Hugo SmartLink?
+
+Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki links** (also known as wikilinks or wiki-style links) in your Hugo content. It transforms `[[page-name]]` syntax into proper internal links, supporting both markdown and HTML output formats.
+
+### Key Features
+
+- 🔗 **Wiki Link Detection**: Automatically detects and converts `[[wikilink]]` syntax
 - ⚙️ **Configurable Patterns**: Supports regex patterns to match different types of links
 - 🎨 **Customizable Output**: Choose between Markdown or HTML output formats
 - 🏷️ **Smart Labels**: Define custom labels and URL patterns
 - 📁 **Prefix Aliases**: Map namespace prefixes to different paths
 - 🎯 **Theme Compatible**: Works seamlessly with existing Hugo themes
+- **Zero Configuration**: Works out of the box with sensible defaults
+- **Flexible Output**: Generate HTML links or markdown links
+- **Pattern Matching**: Support for custom link patterns (JIRA, GitHub issues, etc.)
+- **Namespace Stripping**: Clean up link labels automatically
+- **Fallback Handling**: Graceful handling of broken links
 
 <!-- omit from toc -->
 ## Table of Contents
 
+- [What is Hugo SmartLink?](#what-is-hugo-smartlink)
+  - [Key Features](#key-features)
 - [Installation](#installation)
   - [Step 1: Install the Module](#step-1-install-the-module)
   - [Step 2: Add to Site Configuration](#step-2-add-to-site-configuration)
@@ -63,11 +76,11 @@ Add the module to your `hugo.toml`:
 
 ### Zero Configuration
 
-The module works out of the box with default settings. No configuration required!
+The Hugo SmartLink module works out of the box with default settings. You can immediately start using wiki links in your Hugo content.
 
 ### Basic Usage
 
-You can immediately use `[[link]]` syntax in your content:
+You can immediately use `[[wikilink]]` syntax in your content:
 
 ```markdown
 # My Documentation
@@ -110,7 +123,7 @@ class = "broken-link" # Only used when output: html
 
 ### Basic Configuration
 
-Customize SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` array:
+Customize Hugo SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` array:
 
 ```toml
 [params]
@@ -142,6 +155,12 @@ Customize SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` array:
     pattern = "^https://github\\.com/([^/]+/[^/]+)/issues/(\\d+)$"
     label = "{1}#{2}"
     class = "github-issue"
+
+  [[params.smartWikiLinks]]
+    name = "Slack Channel"
+    pattern = "^slack:#([a-z0-9-]+)$"
+    url = "https://company.slack.com/app_redirect?channel={1}"
+    class = "slack-channel"
 ```
 
 **Examples:**
@@ -179,7 +198,7 @@ Customize SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` array:
 
 #### Output Format
 
-Control how links are generated:
+Control how wiki links are generated:
 
 ```toml
 [params]
@@ -194,7 +213,7 @@ Control how links are generated:
 
 #### Prefix Aliases
 
-Map namespace prefixes to different paths:
+Map namespace prefixes to different paths for your wiki links:
 
 ```toml
 [params]
@@ -296,6 +315,8 @@ We welcome contributions! Please feel free to open an issue or submit a pull req
 <!-- omit from toc -->
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
+
+**Keywords**: Hugo, wikilink, wiki link, smartlink, internal link, hugo wiki, hugo module
