@@ -39,7 +39,7 @@ help:
 
 # Default target
 test: prepare
-	./run-tests.sh "$$TEST_DIR" "$$VERBOSE"
+	./scripts/run-tests.sh "$$TEST_DIR" "$$VERBOSE"
 
 # Clean test directory
 clean:
@@ -57,8 +57,8 @@ fresh:
 
 # Prepare test site structure only
 prepare:
-	@./prepare-test-site.sh "$$TEST_DIR"
-	@./prepare-test.sh "$$TEST_DIR"
+	@./scripts/prepare-test-site.sh "$$TEST_DIR"
+	@./scripts/prepare-test.sh "$$TEST_DIR"
 
 # Show help
 .DEFAULT_GOAL := help
