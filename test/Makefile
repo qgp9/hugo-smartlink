@@ -3,17 +3,19 @@
 .PHONY: help test clean cleanall fresh prepare
 
 # Default test directory
-TEST_DIR ?= tmp-test-site/generated
-TMP_SITE_DIR = tmp-test-site
-TMP_SITE_DIR_ABS = $(abspath ./$(TMP_SITE_DIR))
+export TEST_DIR ?= tmp-test-site/generated
+export TMP_SITE_DIR = tmp-test-site
+export TMP_SITE_DIR_ABS = $(abspath ./$(TMP_SITE_DIR))
 
+export VERBOSE = $(V)
 # TEST_DIR_ABS will be empty if it's out of the current directory
-TEST_DIR_ABS = $(filter $(TMP_SITE_DIR_ABS)/%,$(abspath $(TEST_DIR)))
+export TEST_DIR_ABS = $(filter $(TMP_SITE_DIR_ABS)/%,$(abspath $(TEST_DIR)))
 
 # Exit with error if TEST_DIR_ABS is empty
 ifeq ($(TEST_DIR_ABS),)
 $(error TEST_DIR_ABS is empty. TEST_DIR must be a subdirectory of the $(TMP_SITE_DIR_ABS). TEST_DIR=$(TEST_DIR))
 endif
+
 
 # Default target
 help:
@@ -32,11 +34,12 @@ help:
 	@echo "  TEST_DIR  - Test directory path (default: $(TEST_DIR))"
 	@echo "              Must be a subdirectory of ./$(TMP_SITE_DIR)/"
 	@echo "              Examples: ./$(TMP_SITE_DIR)/generated, ./$(TMP_SITE_DIR)/my-test"
+	@echo "  V         - Verbose mode (V=1 for verbose output, default: 0)"
 	@echo ""
 
 # Default target
 test: prepare
-	@./run-tests.sh "$$TEST_DIR"
+	./run-tests.sh "$$TEST_DIR" "$$VERBOSE"
 
 # Clean test directory
 clean:

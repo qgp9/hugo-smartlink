@@ -52,12 +52,25 @@
         {{- if and $stripNamespace (not $hasLabel) -}}
             {{- $label = replaceRE "^.*/" "" $label -}}
         {{- end -}}
-        {{- $page := site.GetPage (urlize (lower $main)) -}}
-        {{- if not $page -}}
-            {{- $matched = false -}}
-            {{- continue -}}
+        {{- if eq $main "" -}}
+            {{- /* Main is empty, check if anchor is also empty */ -}}
+            {{- if eq $anchor "" -}}
+                {{- /* Both main and anchor are empty, continue to next rule */ -}}
+                {{- $matched = false -}}
+                {{- continue -}}
+            {{- else -}}
+                {{- /* Main is empty but anchor exists, just use the anchor */ -}}
+                {{- $path = (print "#" $anchor) -}}
+            {{- end -}}
+        {{- else -}}
+            {{- $main = strings.ReplaceRE `/+` "/" $main -}}
+            {{- $page := site.GetPage (urlize (lower $main)) -}}
+            {{- if not $page -}}
+                {{- $matched = false -}}
+                {{- continue -}}
+            {{- end -}}
+            {{- $path = (print $page.RelPermalink $anchorHead $anchor) -}}
         {{- end -}}
-        {{- $path = (print $page.RelPermalink $anchorHead $anchor) -}}
     {{- end -}}
     {{ if .url -}}
         {{- $path = .url -}}

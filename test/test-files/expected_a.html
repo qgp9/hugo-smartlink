@@ -7,16 +7,10 @@
 {{- $same_output := eq $expected_output $actual_output -}}
 {{- $should_result := or (and $same_output "SHOULD_SUCCESS") "SHOULD_FAIL" -}}
 
-{{- /* Normalize href: ensure it ends with / */ -}}
-{{- $normalized_href := $href -}}
-{{- if not (hasSuffix $href "/") -}}
-    {{- $normalized_href = printf "%s/" $href -}}
-{{- end -}}
-
 {{- if eq $expected_output "markdown" -}}
-    {{- $should_result }} ||| <a href="{{ $normalized_href }}">{{ $label }}</a>
+    {{- $should_result }} ||| <a href="{{ $href }}">{{ $label }}</a>
 {{- else if eq $expected_output "html" -}}
-    {{- $should_result }} ||| <a href="{{ $normalized_href }}" class="{{ $class }}">{{ $label }}</a>
+    {{- $should_result }} ||| <a href="{{ $href }}" class="{{ $class }}">{{ $label }}</a>
 {{- else -}}
     {{- $should_result }} ||| "ERROR_WRONG_TEST_INPUT"
 {{- end -}} 

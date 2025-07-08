@@ -48,6 +48,48 @@ title = "SmartLink Test Site"
 [params]
   [params.smartLinkOptions]
     output = "$smartLinkOptions_output"
+    [params.smartLinkOptions.prefixAlias]
+      "~" = "/doc/"
+      "docs:" = "/documentation/"
+
+  # Define custom patterns (higher priority)
+  [[params.smartWikiLinks]]
+    name = "JIRA"
+    pattern = "^([A-Z][A-Z0-9]+-[0-9]+)$"
+    url = "https://example.com/browse/{0}"
+    class = "jira-link"
+
+  [[params.smartWikiLinks]]
+    name = "GitHub Issue"
+    pattern = "^#([0-9]+)$"
+    url = "https://github.com/owner/repo/issues/{1}"
+    class = "github-issue"
+
+  [[params.smartWikiLinks]]
+    name = "GitHub Issue with Label"
+    pattern = "^https://github.com/([^/]+/[^/]+)/issues/([0-9]+)$"
+    label = "{1}#{2}"
+    class = "github-issue"
+
+  [[params.smartWikiLinks]]
+    name = "Slack Channel"
+    pattern = "^slack:#([a-z0-9-]+)$"
+    url = "https://company.slack.com/app_redirect?channel={1}"
+    class = "slack-channel"
+
+  # Define wiki-style links (lower priority)
+  [[params.smartWikiLinks]]
+    name = "WikiLink"
+    wikiLink = true
+    stripNamespace = true
+    class = "wikilink"
+
+  # Broken Links fallback
+  [[params.smartWikiLinks]]
+    name = "Broken Link"
+    pattern = "^.*$"
+    url = "/broken-link/"
+    class = "broken-link"
 EOF
 }
 
@@ -104,9 +146,30 @@ create_basic_dummy_pages() {
     make_page "$TEST_SITE_DIR/content/test.page/index.md" "Test Page" "Test page with dots."
     make_page "$TEST_SITE_DIR/content/test@domain/index.md" "Test Page" "Test page with @ symbol."
     
-    # Create nested pages
+    # Create nested pages with proper Hugo structure
+    # Branch directories need _index.md, leaf pages use index.md
+    make_page "$TEST_SITE_DIR/content/docs/_index.md" "Documentation" "Documentation section."
     make_page "$TEST_SITE_DIR/content/docs/guide/index.md" "Guide" "Documentation guide."
+    make_page "$TEST_SITE_DIR/content/docs/api/_index.md" "API" "API documentation section."
     make_page "$TEST_SITE_DIR/content/docs/api/v1/index.md" "API v1" "API version 1 documentation."
+    
+    # Create pages for three-level path tests
+    # Note: 4+ level paths are not supported due to Hugo's URL structure limitations
+    # Hugo requires _index.md files for deep nested paths, which complicates SmartLink detection
+    make_page "$TEST_SITE_DIR/content/getting-started/_index.md" "Getting Started" "Getting started section."
+    make_page "$TEST_SITE_DIR/content/getting-started/guide/index.md" "Guide" "Getting started guide."
+    
+    # Create pages for prefix alias tests (these should exist for the alias to work)
+    make_page "$TEST_SITE_DIR/content/doc/about/index.md" "About" "About page for tilde prefix."
+    make_page "$TEST_SITE_DIR/content/doc/installation/index.md" "Installation" "Installation page for tilde prefix."
+    make_page "$TEST_SITE_DIR/content/documentation/guide/index.md" "Guide" "Guide page for docs prefix."
+    make_page "$TEST_SITE_DIR/content/documentation/troubleshooting/index.md" "Troubleshooting" "Troubleshooting page for docs prefix."
+    
+    # Create pages for special character tests
+    make_page "$TEST_SITE_DIR/content/test-한글/index.md" "한글 Test" "Korean character test page."
+    make_page "$TEST_SITE_DIR/content/test-émojis/index.md" "Émojis Test" "Emoji character test page."
+    make_page "$TEST_SITE_DIR/content/page-123/index.md" "Page 123" "Page with numbers."
+    make_page "$TEST_SITE_DIR/content/123-page/index.md" "123 Page" "Page starting with numbers."
 }
 
 copy_test_files() {

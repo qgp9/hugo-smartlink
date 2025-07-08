@@ -30,6 +30,7 @@ run_test() {
     local test_name="$1"
     local test_dir="$2"
     local config_file="$3"
+    local verbose="$4"
     local test_dir_abs=$(readlink -f "$test_dir")
     local config_file_abs=$(readlink -f "$config_file")
     local owd=$(pwd)
@@ -38,8 +39,13 @@ run_test() {
     
     # Set module replacement before cd
     QUIET="--quiet"
+    if [ "$verbose" = "1" ]; then
+        QUIET=""
+    fi
     cd "$test_dir_abs"
+    set -x
     HUGO_MODULE_REPLACEMENTS="$HUGO_MODULE_REPLACEMENTS" hugo build --config "$config_file_abs" $QUIET
+    set +x
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Hugo build failed for $test_name${NC}"
         if [[ "$test_name" == *"Markdown"* ]]; then
@@ -94,7 +100,11 @@ run_test() {
                 # Clean up the parts (remove leading/trailing whitespace)
                 converted=$(echo "$converted" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
                 should_result=$(echo "$should_result" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-                expected_result=$(echo "$expected_result" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                expected_result=$(echo "$expected_result" | sed 's/^.*<a/<a/;s/a>.*$/a>/')
+                
+                # Clean up src_literal: remove <p><code>...</code></p> or <code>...</code> and decode HTML entities
+                src_literal_clean=$(echo "$src_literal" | sed -E 's#^<p><code>(.*)</code></p>$#\1#' | sed -E 's#^<code>(.*)</code>$#\1#')
+                src_literal_clean=$(echo "$src_literal_clean" | sed 's/&lt;/</g; s/&gt;/>/g; s/&quot;/\"/g; s/&amp;/\&/g')
                 
                 # Remove <code> tags from converted and expected_result
                 converted=$(echo "$converted" | sed 's/^<code>//;s/<\/code>$//')
@@ -118,6 +128,7 @@ run_test() {
                 if [ "$converted" != "$expected_result" ]; then
                     if [ "$should_pass" = true ]; then
                         echo -e "${RED}❌ Mismatch found (should pass):${NC}"
+                        echo "  Test:      $src_literal_clean"
                         echo "  Converted: $converted"
                         echo "  Expected:  $expected_result"
                         test_passed=false
@@ -131,6 +142,7 @@ run_test() {
                         ((passed_count++))
                     else
                         echo -e "${RED}❌ Test passed when it should fail:${NC}"
+                        echo "  Test:      $src_literal_clean"
                         echo "  Converted: $converted"
                         echo "  Expected:  $expected_result"
                         test_passed=false
@@ -165,14 +177,19 @@ run_test() {
 
 # Main execution
 main() {
+    local verbose="${2:-0}"
+    
     echo -e "${BLUE}🚀 Starting SmartLink test suite...${NC}"
+    if [ "$verbose" = "1" ]; then
+        echo -e "${YELLOW}Verbose mode enabled${NC}"
+    fi
     
     echo -e "${BLUE}🔨 Building test sites...${NC}"
     
     # Run tests on $TEST_DIR
     echo -e "${BLUE}📊 Running tests on $TEST_DIR...${NC}"
-    run_test "Markdown Output Test" "$TEST_DIR" "$TEST_DIR/config-markdown.toml"
-    run_test "HTML Output Test" "$TEST_DIR" "$TEST_DIR/config-html.toml"
+    run_test "Markdown Output Test" "$TEST_DIR" "$TEST_DIR/config-markdown.toml" "$verbose"
+    run_test "HTML Output Test" "$TEST_DIR" "$TEST_DIR/config-html.toml" "$verbose"
     
     echo ""
     echo "📊 Test Results:"
