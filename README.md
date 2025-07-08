@@ -16,16 +16,15 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
 ### Key Features
 
 - 🔗 **Wiki Link Detection**: Automatically detects and converts `[[wikilink]]` syntax
-- ⚙️ **Configurable Patterns**: Supports regex patterns to match different types of links
+- 🔧 **Configurable Patterns**: Supports regex patterns to match different types of links
 - 🎨 **Customizable Output**: Choose between Markdown or HTML output formats
 - 🏷️ **Smart Labels**: Define custom labels and URL patterns
 - 📁 **Prefix Aliases**: Map namespace prefixes to different paths
 - 🎯 **Theme Compatible**: Works seamlessly with existing Hugo themes
-- **Zero Configuration**: Works out of the box with sensible defaults
-- **Flexible Output**: Generate HTML links or markdown links
-- **Pattern Matching**: Support for custom link patterns (JIRA, GitHub issues, etc.)
-- **Namespace Stripping**: Clean up link labels automatically
-- **Fallback Handling**: Graceful handling of broken links
+- ⚡ **Zero Configuration**: Works out of the box with sensible defaults
+- 🎯 **Pattern Matching**: Support for custom link patterns (JIRA, GitHub issues, etc.)
+- 🧹 **Namespace Stripping**: Clean up link labels automatically
+- 🛡️ **Fallback Handling**: Graceful handling of broken links
 
 <!-- omit from toc -->
 ## Table of Contents
@@ -52,6 +51,9 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
 - [For Theme Developers](#for-theme-developers)
   - [Step 1: Create Content Partial](#step-1-create-content-partial)
   - [Step 2: Update Templates](#step-2-update-templates)
+- [TODO](#todo)
+  - [Known Issues](#known-issues)
+  - [Planned Features](#planned-features)
 - [Contributing](#contributing)
 
 ## Installation
@@ -130,14 +132,7 @@ Customize Hugo SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` a
   [params.smartLinkOptions]
     output = "markdown"  # "markdown" or "html" - use "html" for CSS classes
 
-  # Define wiki-style links
-  [[params.smartWikiLinks]]
-    name = "WikiLink"
-    wikiLink = true
-    stripNamespace = true  # Remove namespace prefix from display text
-    class = "wikilink"  # Only used when output: html
-
-  # Define custom patterns
+  # Define custom patterns (recommended: higher priority)
   [[params.smartWikiLinks]]
     name = "JIRA"
     pattern = "^([A-Z][A-Z0-9]+-\\d+)$"
@@ -161,11 +156,54 @@ Customize Hugo SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` a
     pattern = "^slack:#([a-z0-9-]+)$"
     url = "https://company.slack.com/app_redirect?channel={1}"
     class = "slack-channel"
+
+  # Define wiki-style links (recommended: lower priority)
+  [[params.smartWikiLinks]]
+    name = "WikiLink"
+    wikiLink = true
+    stripNamespace = true  # Remove namespace prefix from display text
+    class = "wikilink"  # Only used when output: html
+
+  # Broken Links fallback (recommended: lowest priority)
+  [[params.smartWikiLinks]]
+    name = "Broken Link"
+    pattern = "^.*$"
+    url = "/broken-link/"
+    class = "broken-link"
 ```
+
+**Recommended Rule Order:**
+
+SmartLink processes rules in the order they appear in the configuration. While you can arrange them in any order, we recommend this sequence:
+
+1. **Custom Patterns** (highest priority) - JIRA, GitHub issues, Slack channels, etc.
+2. **Specific Wiki Links** (medium-high priority) - Wiki links with specific patterns
+3. **General Wiki Links** (medium priority) - General internal page links
+4. **Broken Link Fallback** (lowest priority) - Handles unmatched links
+
+This ensures that for example `[[#42]]` matches the GitHub Issue pattern instead of being treated as a wiki link. You can have multiple wiki link rules with different patterns if needed.
 
 **Examples:**
 
-**WikiLink Rule:**
+**JIRA Rule (Custom Pattern):**
+
+- Input: `[[PROJ-123]]`
+  - Markdown: `[PROJ-123](https://example.com/browse/PROJ-123)`
+  - HTML: `<a href="https://example.com/browse/PROJ-123" class="jira-link">PROJ-123</a>`
+
+**GitHub Issue Rule (Custom Pattern):**
+
+- Input: `[[#42]]`
+  - Markdown: `[#42](https://github.com/owner/repo/issues/42)`
+  - HTML: `<a href="https://github.com/owner/repo/issues/42" class="github-issue">#42</a>`
+
+**GitHub Issue with Label Rule (Custom Pattern):**
+
+- Input: `[[https://github.com/company/repo/issues/123]]`
+  - Markdown: `[company/repo#123](https://github.com/company/repo/issues/123)`
+  - HTML: `<a href="https://github.com/company/repo/issues/123" class="github-issue">company/repo#123</a>`
+
+**WikiLink Rule (Internal Links):**
 
 - Input: `[[my-page]]`
   - Markdown: `[my-page](/my-page)`
@@ -175,24 +213,6 @@ Customize Hugo SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` a
   - Markdown: `[guide](/docs/guide)`
   - HTML: `<a href="/docs/guide" class="wikilink">guide</a>`
   - Note: stripNamespace removes path prefix
-
-**JIRA Rule:**
-
-- Input: `[[PROJ-123]]`
-  - Markdown: `[PROJ-123](https://example.com/browse/PROJ-123)`
-  - HTML: `<a href="https://example.com/browse/PROJ-123" class="jira-link">PROJ-123</a>`
-
-**GitHub Issue Rule:**
-
-- Input: `[[#42]]`
-  - Markdown: `[#42](https://github.com/owner/repo/issues/42)`
-  - HTML: `<a href="https://github.com/owner/repo/issues/42" class="github-issue">#42</a>`
-
-**GitHub Issue with Label Rule:**
-
-- Input: `[[https://github.com/company/repo/issues/123]]`
-  - Markdown: `[company/repo#123](https://github.com/company/repo/issues/123)`
-  - HTML: `<a href="https://github.com/company/repo/issues/123" class="github-issue">company/repo#123</a>`
 
 ### Advanced Configuration
 
@@ -260,7 +280,8 @@ For support, visit [[contact-us]].
 ### Complex Patterns
 
 ```toml
-# Configuration for multiple systems
+# Configuration for multiple systems (recommended order)
+# 1. Custom patterns (highest priority)
 [[params.smartWikiLinks]]
   name = "JIRA"
   pattern = "^([A-Z][A-Z0-9]+-\\d+)$"
@@ -284,6 +305,28 @@ For support, visit [[contact-us]].
   pattern = "^slack:#([a-z0-9-]+)$"
   url = "https://company.slack.com/app_redirect?channel={1}"
   class = "slack-channel"
+
+# 2. Wiki links (medium priority) - you can have multiple wiki link rules
+# Optional: Specific wiki link rule with pattern (higher priority)
+# [[params.smartWikiLinks]]
+#   name = "Special WikiLink"
+#   wikiLink = true
+#   pattern = "^special-.*$"
+#   class = "special-wikilink"
+
+# General wiki link rule (lower priority)
+[[params.smartWikiLinks]]
+  name = "WikiLink"
+  wikiLink = true
+  stripNamespace = true
+  class = "wikilink"
+
+# 3. Broken link fallback (lowest priority)
+[[params.smartWikiLinks]]
+  name = "Broken Link"
+  pattern = "^.*$"
+  url = "/broken-link/"
+  class = "broken-link"
 ```
 
 ## For Theme Developers
@@ -307,6 +350,21 @@ In your page templates (e.g., `layouts/_default/single.html`), replace `{{ .Cont
 ```
 
 This allows Hugo SmartLink to override the content partial and apply link transformations without requiring users to modify the theme directly.
+
+## TODO
+
+### Known Issues
+
+- **Malformed Links**: `[[[]]` and `[[ ]]` are not properly handled and remain as-is instead of being converted to broken links
+- **Non-ASCII Characters**: Unicode characters in page names (e.g., `test-한글`, `test-émojis`) are not properly URL-encoded when used as wiki links
+
+### Planned Features
+
+- **Better Error Handling**: Improve handling of malformed wiki link syntax
+- **URL Encoding**: Proper handling of non-ASCII characters in page names
+- **Performance Optimization**: Cache processed links for better performance
+- **More Pattern Types**: Support for additional external system patterns
+- **Testing Framework**: Comprehensive test suite for all features
 
 ## Contributing
 
