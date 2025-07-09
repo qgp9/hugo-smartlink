@@ -358,9 +358,9 @@ We've conducted extensive performance testing with various content sizes. Here a
 
 | Configuration | Build Time | Performance vs Baseline | SmartLink Overhead |
 |---------------|------------|------------------------|-------------------|
-| **SmartLink Disabled** | 289ms | 1.0x (baseline) | - |
-| **SmartLink Enabled (HTML)** | 156ms | 1.85x faster | -133ms (-46%) |
-| **SmartLink Enabled (Markdown)** | 270ms | 1.07x | -19ms (-7%) |
+| **SmartLink Disabled** | 141ms | 1.0x (baseline) | - |
+| **SmartLink Enabled (HTML)** | 164ms | 1.16x | +23ms (+16%) |
+| **SmartLink Enabled (Markdown)** | 220ms | 1.56x | +79ms (+56%) |
 
 #### Detailed Analysis
 
