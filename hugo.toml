@@ -2,6 +2,7 @@
 # Smart Link Options
 [params.smartLinkOptions]
 output = "html"
+normalizeEscapedWikilink = true
 
 # Smart Wiki Links - Basic configuration
 [[params.smartWikiLinks]]

@@ -1,4 +1,5 @@
 {{- $output := site.Params.smartLinkOptions.output | default "html" -}}
+{{- $normalizeEscaped := site.Params.smartLinkOptions.normalizeEscapedWikilink | default true -}}
 {{- $content := "" -}}
 {{- if not (in .Content "[[") -}}
     {{- $content = .Content -}}
@@ -16,5 +17,7 @@
 {{- else -}}
     {{- $content = .RenderString (replaceRE `\[\[(\s*[^]\s][^]]*)]]` "{{% smartlink `$1` %}}" .RawContent) -}}
 {{- end -}}
-{{- $content = replaceRE `\[\\\[(.*?)]]` "[[$1]]" $content -}}
+{{- if $normalizeEscaped -}}
+    {{- $content = replaceRE `\[\\\[(.*?)]]` "[[$1]]" $content -}}
+{{- end -}}
 {{- $content | safeHTML -}}

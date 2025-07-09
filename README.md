@@ -112,6 +112,7 @@ If you want to see what the default configuration looks like:
 # Smart Link Options
 [params.smartLinkOptions]
 output = "html"  # Default is now "html" for better performance and CSS support
+normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
 
 # Internal Wiki Link
 [[params.smartWikiLinks]]
@@ -138,6 +139,7 @@ Customize Hugo SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` a
 [params]
   [params.smartLinkOptions]
     output = "html"  # "html" (default) or "markdown"
+    normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
 
   # Define custom patterns (recommended: higher priority)
   [[params.smartWikiLinks]]
@@ -254,6 +256,25 @@ Map namespace prefixes to different paths for your wiki links:
 
 - `[[~/About]]` → `[About](/doc/about)`
 - `[[docs:Guide]]` → `[Guide](/documentation/guide)`
+
+#### Escaped Wiki Link Normalization
+
+Control whether escaped wiki links are normalized for documentation:
+
+```toml
+[params]
+  [params.smartLinkOptions]
+    normalizeEscapedWikilink = true  # Default: true
+```
+
+**Examples:**
+
+- `normalizeEscapedWikilink = true`: `[\[wikilink]]` → `[[wikilink]]` (for documentation)
+- `normalizeEscapedWikilink = false`: `[\[wikilink]]` → `[\[wikilink]]` (performance optimized)
+
+**Use cases:**
+- **`true`**: When you need to show wiki link syntax in documentation
+- **`false`**: For better performance when escaped links are not needed
 
 ## Usage Examples
 
