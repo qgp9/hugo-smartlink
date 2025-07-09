@@ -80,6 +80,9 @@ run_test() {
     local test_count=0
     local passed_count=0
     local failed_count=0
+    local first_two_results=()
+    local first_two_statuses=()
+    local result_count=0
     
     # Extract lines with ||| pattern and verify each one
     while IFS= read -r line; do
@@ -117,6 +120,16 @@ run_test() {
                 # Remove trailing HTML tags (like </code></p>) from both
                 converted=$(echo "$converted" | sed 's#</code></p>##g' | sed 's#</p>##g')
                 expected_result=$(echo "$expected_result" | sed 's#</code></p>##g' | sed 's#</p>##g')
+                
+                # Store first two results for display
+                if [ $result_count -lt 2 ]; then
+                    first_two_results+=("Test: $src_literal_clean")
+                    first_two_results+=("Converted: $converted")
+                    first_two_results+=("Expected: $expected_result")
+                    first_two_statuses+=("$should_result")
+                    first_two_results+=("---")
+                fi
+                ((result_count++))
                 
                 # Check if this test should pass based on the should_result
                 local should_pass=false
@@ -168,6 +181,28 @@ run_test() {
     
     if [ "$test_passed" = true ]; then
         echo -e "${GREEN}✅ $test_name passed! ($passed_count/$test_count tests)${NC}"
+        # Show first two results even when test passes
+        if [ ${#first_two_results[@]} -gt 0 ]; then
+            echo -e "${BLUE}📋 First 2 test results:${NC}"
+            local status_index=0
+            for result in "${first_two_results[@]}"; do
+                if [[ "$result" == "---" ]]; then
+                    echo ""
+                    ((status_index++))
+                else
+                    echo "  $result"
+                    # Add status with color after the third line (Expected: ...)
+                    if [[ "$result" == "Expected:"* ]] && [ $status_index -lt ${#first_two_statuses[@]} ]; then
+                        local status="${first_two_statuses[$status_index]}"
+                        if [[ "$status" == "SHOULD_SUCCESS" ]]; then
+                            echo -e "  Status: ${GREEN}✅ SHOULD_SUCCESS${NC}"
+                        else
+                            echo -e "  Status: ${YELLOW}⚠️ SHOULD_FAIL${NC}"
+                        fi
+                    fi
+                fi
+            done
+        fi
     else
         echo -e "${RED}❌ $test_name failed! ($passed_count/$test_count tests passed)${NC}"
     fi

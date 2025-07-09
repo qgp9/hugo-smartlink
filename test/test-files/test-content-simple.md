@@ -2,8 +2,6 @@
 title: Simple SmartLink Test Content
 ---
 
-# Test Content
-
 This is a simple test content with some SmartLinks.
 
 ## Basic Links
@@ -30,4 +28,4 @@ Read the [[docs/guide]] and [[docs/api/v1]].
 
 ## End
 
-That's all for this test content. 
+That's all for this test content.

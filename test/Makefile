@@ -14,6 +14,8 @@ PERF_RESULT_DIR_ABS = $(abspath $(PERF_RESULT_DIR))
 SMARTLINK_DIR = $(realpath ..)
 
 export VERBOSE = $(V)
+Q=$(if $(VERBOSE),,@)
+
 # TEST_DIR_ABS will be empty if it's out of the current directory
 export TEST_DIR_ABS = $(filter $(TMP_SITE_DIR_ABS)/%,$(abspath $(TEST_DIR)))
 
@@ -70,26 +72,21 @@ test-perf: cleanall
 	@$(MAKE) prepare-perf
 	@$(MAKE) prepare
 	@echo "Running performance test with hyperfine..."
-	@echo "Testing SmartLink: fully-disabled vs shortcode-disabled vs no-cache vs with-cache..."
+	@echo "Testing SmartLink: disabled vs html-enabled vs markdown-enabled..."
 	@mkdir -p $(PERF_RESULT_DIR)
-	@mkdir -p $(TEST_DIR_ABS)/layouts/_shortcodes
-	@mkdir -p $(TEST_DIR_ABS)/layouts/_partials
-	hyperfine \
+	$(Q)hyperfine \
 		--warmup 1 \
 		--runs 5 \
 		--prepare 'rm -rf $(TEST_DIR_ABS)/public' \
 		--export-json $(PERF_RESULT_DIR_ABS)/hyperfine-results.json \
 		--export-markdown $(PERF_RESULT_DIR_ABS)/hyperfine-results.md \
-		--command-name "Fully Disabled" \
-		--command-name "Shortcode Disabled" \
-		--command-name "No Cache" \
-		--command-name "With Cache" \
-		'cp test-files/test-layouts/_shortcodes/smartlink-disabled.html $(TEST_DIR_ABS)/layouts/_shortcodes/smartlink.html && cp test-files/test-layouts/_partials/content-disabled.html $(TEST_DIR_ABS)/layouts/_partials/content.html && cd $(TEST_DIR_ABS) && HUGO_MODULE_REPLACEMENTS="$(HUGO_MODULE_REPLACEMENTS)" hugo --config config-html.toml --quiet' \
-		'cp test-files/test-layouts/_shortcodes/smartlink-disabled.html $(TEST_DIR_ABS)/layouts/_shortcodes/smartlink.html && cp test-files/test-layouts/_partials/content-shortcode-disabled.html $(TEST_DIR_ABS)/layouts/_partials/content.html && cd $(TEST_DIR_ABS) && HUGO_MODULE_REPLACEMENTS="$(HUGO_MODULE_REPLACEMENTS)" hugo --config config-html.toml --quiet' \
-		'cp test-files/test-layouts/_shortcodes/smartlink-no-cache.html $(TEST_DIR_ABS)/layouts/_shortcodes/smartlink.html && cp $(SMARTLINK_DIR)/layouts/_partials/content-smartlink.html $(TEST_DIR_ABS)/layouts/_partials/content.html && cd $(TEST_DIR_ABS) && HUGO_MODULE_REPLACEMENTS="$(HUGO_MODULE_REPLACEMENTS)" hugo --config config-html.toml --quiet' \
-		'cp $(SMARTLINK_DIR)/layouts/_shortcodes/smartlink.html $(TEST_DIR_ABS)/layouts/_shortcodes/smartlink.html && cp $(SMARTLINK_DIR)/layouts/_partials/content-smartlink.html $(TEST_DIR_ABS)/layouts/_partials/content.html && cd $(TEST_DIR_ABS) && HUGO_MODULE_REPLACEMENTS="$(HUGO_MODULE_REPLACEMENTS)" hugo --config config-html.toml --quiet'
+		--command-name "SmartLink Disabled" \
+		--command-name "SmartLink Enabled (HTML)" \
+		--command-name "SmartLink Enabled (Markdown)" \
+		'cd $(TEST_DIR_ABS) && hugo --config config-disabled.toml -l layouts-disabled --quiet' \
+		'cd $(TEST_DIR_ABS) && hugo --config config-html.toml -l layouts --quiet' \
+		'cd $(TEST_DIR_ABS) && hugo --config config-markdown.toml -l layouts --quiet'
 	@echo "Results saved to $(PERF_RESULT_DIR)/hyperfine-results.json and .md"
-
 
 
 # Clean test directory

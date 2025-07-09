@@ -1,7 +1,7 @@
 [params]
 # Smart Link Options
 [params.smartLinkOptions]
-output = "markdown"
+output = "html"
 
 # Smart Wiki Links - Basic configuration
 [[params.smartWikiLinks]]
