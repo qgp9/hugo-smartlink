@@ -8,6 +8,9 @@
     {{- $wikilinks := findRE `\[\[[^]]+\]\]` .Content | uniq -}}
     {{- $content = .Content -}}
     {{- range $wikilink := $wikilinks -}}
+        {{- if findRE `/\S+>` $wikilink -}}
+            {{- continue -}}
+        {{- end -}}
         {{- $link := trim $wikilink "[] " -}}
         {{- if not $link -}}
             {{- continue -}}
