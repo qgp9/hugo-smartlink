@@ -33,7 +33,7 @@ main() {
 
 create_config() {
     local config_file="$1"
-    local smartLinkOptions_output="$2"
+    local smartlink_output="$2"
     # Create base config.toml
     cat > "$config_file" << EOF
 baseURL = "http://example.com/"
@@ -46,50 +46,51 @@ title = "SmartLink Test Site"
     disable = false
 
 [params]
-  [params.smartLinkOptions]
-    output = "$smartLinkOptions_output"
-    [params.smartLinkOptions.prefixAlias]
-      "~" = "/doc/"
-      "docs:" = "/documentation/"
+  [params.modules]
+    [params.modules.smartlink]
+      output = "$smartlink_output"
+      [params.modules.smartlink.prefixAlias]
+        "~" = "/doc/"
+        "docs:" = "/documentation/"
 
-  # Define custom patterns (higher priority)
-  [[params.smartWikiLinks]]
-    name = "JIRA"
-    pattern = "^([A-Z][A-Z0-9]+-[0-9]+)$"
-    url = "https://example.com/browse/{0}"
-    class = "jira-link"
+      # SmartLink rules configuration
+      [[params.modules.smartlink.rules]]
+        name = "JIRA"
+        pattern = "^([A-Z][A-Z0-9]+-[0-9]+)$"
+        url = "https://example.com/browse/{0}"
+        class = "jira-link"
 
-  [[params.smartWikiLinks]]
-    name = "GitHub Issue"
-    pattern = "^#([0-9]+)$"
-    url = "https://github.com/owner/repo/issues/{1}"
-    class = "github-issue"
+      [[params.modules.smartlink.rules]]
+        name = "GitHub Issue"
+        pattern = "^#([0-9]+)$"
+        url = "https://github.com/owner/repo/issues/{1}"
+        class = "github-issue"
 
-  [[params.smartWikiLinks]]
-    name = "GitHub Issue with Label"
-    pattern = "^https://github.com/([^/]+/[^/]+)/issues/([0-9]+)$"
-    label = "{1}#{2}"
-    class = "github-issue"
+      [[params.modules.smartlink.rules]]
+        name = "GitHub Issue with Label"
+        pattern = "^https://github.com/([^/]+/[^/]+)/issues/([0-9]+)$"
+        label = "{1}#{2}"
+        class = "github-issue"
 
-  [[params.smartWikiLinks]]
-    name = "Slack Channel"
-    pattern = "^slack:#([a-z0-9-]+)$"
-    url = "https://company.slack.com/app_redirect?channel={1}"
-    class = "slack-channel"
+      [[params.modules.smartlink.rules]]
+        name = "Slack Channel"
+        pattern = "^slack:#([a-z0-9-]+)$"
+        url = "https://company.slack.com/app_redirect?channel={1}"
+        class = "slack-channel"
 
-  # Define wiki-style links (lower priority)
-  [[params.smartWikiLinks]]
-    name = "WikiLink"
-    wikiLink = true
-    stripNamespace = true
-    class = "wikilink"
+      # Define wiki-style links (lower priority)
+      [[params.modules.smartlink.rules]]
+        name = "WikiLink"
+        wikiLink = true
+        stripNamespace = true
+        class = "wikilink"
 
-  # Broken Links fallback
-  [[params.smartWikiLinks]]
-    name = "Broken Link"
-    pattern = "^.*$"
-    url = "/broken-link/"
-    class = "broken-link"
+      # Broken Links fallback
+      [[params.modules.smartlink.rules]]
+        name = "Broken Link"
+        pattern = "^.*$"
+        url = "/broken-link/"
+        class = "broken-link"
 EOF
 }
 

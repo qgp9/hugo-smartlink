@@ -38,11 +38,11 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
   - [Zero Configuration](#zero-configuration)
   - [Basic Usage](#basic-usage)
   - [Default Configuration (Reference)](#default-configuration-reference)
-- [Configuration](#configuration)
   - [Basic Configuration](#basic-configuration)
   - [Advanced Configuration](#advanced-configuration)
     - [Output Format](#output-format)
     - [Prefix Aliases](#prefix-aliases)
+    - [Escaped Wiki Link Normalization](#escaped-wiki-link-normalization)
 - [Usage Examples](#usage-examples)
   - [Wiki-Style Links](#wiki-style-links)
   - [External System Links](#external-system-links)
@@ -109,76 +109,81 @@ If you want to see what the default configuration looks like:
 
 ```toml
 [params]
-# Smart Link Options
-[params.smartLinkOptions]
-output = "html"  # Default is now "html" for better performance and CSS support
-normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
+  [params.modules]
+    [params.modules.smartlink]
+      output = "html"  # Default is now "html" for better performance and CSS support
+      normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
+      [params.modules.smartlink.prefixAlias]
+        "~" = "/doc/"
+        "docs:" = "/documentation/"
 
-# Internal Wiki Link
-[[params.smartWikiLinks]]
-name = "WikiLink"
-wikiLink = true
-stripNamespace = true 
-class = "wikilink" # Only used when output: html
+      # Internal Wiki Link
+      [[params.modules.smartlink.rules]]
+        name = "WikiLink"
+        wikiLink = true
+        stripNamespace = true
+        class = "wikilink" # Only used when output: html
 
-# Broken Links 
-[[params.smartWikiLinks]]
-name = "Broken Link"
-pattern = "^.*$"
-url = "/broken-link/"
-class = "broken-link" # Only used when output: html
+      # Broken Links 
+      [[params.modules.smartlink.rules]]
+        name = "Broken Link"
+        pattern = "^.*$"
+        url = "/broken-link/"
+        class = "broken-link" # Only used when output: html
 ```
-
-## Configuration
 
 ### Basic Configuration
 
-Customize Hugo SmartLink behavior with `smartLinkOptions` and `smartWikiLinks` array:
+Customize Hugo SmartLink behavior with `modules.smartlink` and `modules.smartlink.rules` array:
 
 ```toml
 [params]
-  [params.smartLinkOptions]
-    output = "html"  # "html" (default) or "markdown"
-    normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
+  [params.modules]
+    [params.modules.smartlink]
+      output = "html"  # "html" (default) or "markdown"
+      normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
+      [params.modules.smartlink.prefixAlias]
+        "~" = "/doc/"
+        "docs:" = "/documentation/"
 
-  # Define custom patterns (recommended: higher priority)
-  [[params.smartWikiLinks]]
-    name = "JIRA"
-    pattern = "^([A-Z][A-Z0-9]+-\\d+)$"
-    url = "https://example.com/browse/{0}"
-    class = "jira-link"
+      # Define custom patterns (recommended: higher priority)
+      [[params.modules.smartlink.rules]]
+        name = "JIRA"
+        pattern = "^([A-Z][A-Z0-9]+-\d+)$"
+        url = "https://example.com/browse/{0}"
+        class = "jira-link"
 
-  [[params.smartWikiLinks]]
-    name = "GitHub Issue"
-    pattern = "^#(\\d+)$"
-    url = "https://github.com/owner/repo/issues/{1}"
-    class = "github-issue"
+      [[params.modules.smartlink.rules]]
+        name = "GitHub Issue"
+        pattern = "^#(\d+)$"
+        url = "https://github.com/owner/repo/issues/{1}"
+        class = "github-issue"
 
-  [[params.smartWikiLinks]]
-    name = "GitHub Issue with Label"
-    pattern = "^https://github\\.com/([^/]+/[^/]+)/issues/(\\d+)$"
-    label = "{1}#{2}"
-    class = "github-issue"
+      [[params.modules.smartlink.rules]]
+        name = "GitHub Issue with Label"
+        pattern = "^https://github\.com/([^/]+/[^/]+)/issues/(\d+)$"
+        label = "{1}#{2}"
+        class = "github-issue"
 
-  [[params.smartWikiLinks]]
-    name = "Slack Channel"
-    pattern = "^slack:#([a-z0-9-]+)$"
-    url = "https://company.slack.com/app_redirect?channel={1}"
-    class = "slack-channel"
+      [[params.modules.smartlink.rules]]
+        name = "Slack Channel"
+        pattern = "^slack:#([a-z0-9-]+)$"
+        url = "https://company.slack.com/app_redirect?channel={1}"
+        class = "slack-channel"
 
-  # Define wiki-style links (recommended: lower priority)
-  [[params.smartWikiLinks]]
-    name = "WikiLink"
-    wikiLink = true
-    stripNamespace = true  # Remove namespace prefix from display text
-    class = "wikilink"  # Only used when output: html
+      # Define wiki-style links (recommended: lower priority)
+      [[params.modules.smartlink.rules]]
+        name = "WikiLink"
+        wikiLink = true
+        stripNamespace = true  # Remove namespace prefix from display text
+        class = "wikilink"  # Only used when output: html
 
-  # Broken Links fallback (recommended: lowest priority)
-  [[params.smartWikiLinks]]
-    name = "Broken Link"
-    pattern = "^.*$"
-    url = "/broken-link/"
-    class = "broken-link"
+      # Broken Links fallback (recommended: lowest priority)
+      [[params.modules.smartlink.rules]]
+        name = "Broken Link"
+        pattern = "^.*$"
+        url = "/broken-link/"
+        class = "broken-link"
 ```
 
 **Recommended Rule Order:**
@@ -231,8 +236,9 @@ Control how wiki links are generated:
 
 ```toml
 [params]
-  [params.smartLinkOptions]
-    output = "html"  # or "markdown" (default is now "html")
+  [params.modules]
+    [params.modules.smartlink]
+      output = "html"  # or "markdown" (default is now "html")
 ```
 
 | Format | Pros | Cons |
@@ -246,10 +252,11 @@ Map namespace prefixes to different paths for your wiki links:
 
 ```toml
 [params]
-  [params.smartLinkOptions]
-    [params.smartLinkOptions.prefixAlias]
-      "~" = "/doc/"
-      "docs:" = "/documentation/"
+  [params.modules]
+    [params.modules.smartlink]
+      [params.modules.smartlink.prefixAlias]
+        "~" = "/doc/"
+        "docs:" = "/documentation/"
 ```
 
 **Examples:**
@@ -263,8 +270,9 @@ Control whether escaped wiki links are normalized for documentation:
 
 ```toml
 [params]
-  [params.smartLinkOptions]
-    normalizeEscapedWikilink = true  # Default: true
+  [params.modules]
+    [params.modules.smartlink]
+      normalizeEscapedWikilink = true  # Default: true
 ```
 
 **Examples:**
@@ -310,25 +318,25 @@ For support, visit [[contact-us]].
 ```toml
 # Configuration for multiple systems (recommended order)
 # 1. Custom patterns (highest priority)
-[[params.smartWikiLinks]]
+[[params.modules.smartlink.rules]]
   name = "JIRA"
-  pattern = "^([A-Z][A-Z0-9]+-\\d+)$"
+  pattern = "^([A-Z][A-Z0-9]+-\d+)$"
   url = "https://company.atlassian.net/browse/{0}"
   class = "jira-link"
 
-[[params.smartWikiLinks]]
+[[params.modules.smartlink.rules]]
   name = "GitHub Issue"
-  pattern = "^#(\\d+)$"
+  pattern = "^#(\d+)$"
   url = "https://github.com/company/repo/issues/{1}"
   class = "github-issue"
 
-[[params.smartWikiLinks]]
+[[params.modules.smartlink.rules]]
   name = "GitHub Issue with Label"
-  pattern = "^https://github\\.com/([^/]+/[^/]+)/issues/(\\d+)$"
+  pattern = "^https://github\.com/([^/]+/[^/]+)/issues/(\d+)$"
   label = "{1}#{2}"
   class = "github-issue"
 
-[[params.smartWikiLinks]]
+[[params.modules.smartlink.rules]]
   name = "Slack Channel"
   pattern = "^slack:#([a-z0-9-]+)$"
   url = "https://company.slack.com/app_redirect?channel={1}"
@@ -336,21 +344,21 @@ For support, visit [[contact-us]].
 
 # 2. Wiki links (medium priority) - you can have multiple wiki link rules
 # Optional: Specific wiki link rule with pattern (higher priority)
-# [[params.smartWikiLinks]]
+# [[params.modules.smartlink.rules]]
 #   name = "Special WikiLink"
 #   wikiLink = true
 #   pattern = "^special-.*$"
 #   class = "special-wikilink"
 
 # General wiki link rule (lower priority)
-[[params.smartWikiLinks]]
+[[params.modules.smartlink.rules]]
   name = "WikiLink"
   wikiLink = true
   stripNamespace = true
   class = "wikilink"
 
 # 3. Broken link fallback (lowest priority)
-[[params.smartWikiLinks]]
+[[params.modules.smartlink.rules]]
   name = "Broken Link"
   pattern = "^.*$"
   url = "/broken-link/"

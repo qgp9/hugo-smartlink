@@ -1,18 +1,27 @@
 [params]
-# Smart Link Options
-[params.smartLinkOptions]
-output = "html"
-normalizeEscapedWikilink = true
-
-# Smart Wiki Links - Basic configuration
-[[params.smartWikiLinks]]
-name = "WikiLink"
-wikiLink = true
-stripNamespace = true 
-class = "wikilink" # Only used when output: html
-
-[[params.smartWikiLinks]]
-name = "Broken Link"
-pattern = "^.*$"
-url = "/broken-link/"
-class = "broken-link" # Only used when output: html
+# SmartLink Module Configuration
+[params.modules]
+  [params.modules.smartlink]
+    # Output format for SmartLinks
+    output = "html"
+    
+    # Normalize escaped wikilinks (e.g., \[\[link\]\] -> [[link]])
+    normalizeEscapedWikilink = true
+    
+    # URL prefix aliases for mapping
+    [params.modules.smartlink.prefixAlias]
+      # Example: "github:" -> "https://github.com/"
+      # "docs:" -> "/docs/"
+    
+    # SmartLink rules configuration
+    [[params.modules.smartlink.rules]]
+      name = "WikiLink"
+      wikiLink = true
+      stripNamespace = true
+      class = "wikilink"
+    
+    [[params.modules.smartlink.rules]]
+      name = "Broken Link"
+      pattern = "^.*$"
+      url = "/broken-link/"
+      class = "broken-link"

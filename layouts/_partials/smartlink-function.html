@@ -12,7 +12,8 @@
 {{- end -}}
 
 {{- /* Check prefixAlias */ -}}
-{{- with site.Params.smartLinkOptions.prefixAlias -}}
+{{- $smartlink := site.Params.modules.smartlink -}}
+{{- with $smartlink.prefixAlias -}}
     {{- range $key, $value := . -}}
         {{- if hasPrefix $path $key -}}
             {{- $path = replace $path $key $value -}}
@@ -28,9 +29,9 @@
 {{- /* Initialize Variables */ -}}
 {{- $class := "" -}}
 
-{{- /* Loop through smartWikiLinks */}}
+{{- /* Loop through smartlink rules */}}
 {{- $matched := false -}}
-{{- range site.Params.smartWikiLinks -}}
+{{- range $smartlink.rules -}}
     {{- $match := slice $path -}}
     {{- /* If pattern is not set, match any path */ -}}
     {{- /* if not matched, early continue */ -}}

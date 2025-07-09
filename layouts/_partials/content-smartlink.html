@@ -1,5 +1,6 @@
-{{- $output := site.Params.smartLinkOptions.output | default "html" -}}
-{{- $normalizeEscaped := site.Params.smartLinkOptions.normalizeEscapedWikilink | default true -}}
+{{- $smartlink := site.Params.modules.smartlink -}}
+{{- $output := $smartlink.output | default "html" -}}
+{{- $normalizeEscaped := $smartlink.normalizeEscapedWikilink | default true -}}
 {{- $content := "" -}}
 {{- if not (in .Content "[[") -}}
     {{- $content = .Content -}}

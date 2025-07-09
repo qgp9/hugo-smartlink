@@ -2,7 +2,7 @@
 {{- $class := .Get "class" -}}
 {{- $label := .Get "label" -}}
 {{- $expected_output := .Get "output" -}}
-{{- $actual_output := $.Site.Params.smartLinkOptions.output -}}
+{{- $actual_output := $.Site.Params.modules.smartlink.output -}}
 
 {{- $same_output := eq $expected_output $actual_output -}}
 {{- $should_result := or (and $same_output "SHOULD_SUCCESS") "SHOULD_FAIL" -}}
