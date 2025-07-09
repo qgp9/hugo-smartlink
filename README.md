@@ -48,6 +48,13 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
   - [External System Links](#external-system-links)
   - [With Prefix Aliases](#with-prefix-aliases)
   - [Complex Patterns](#complex-patterns)
+- [Performance](#performance)
+  - [Performance Benchmarks](#performance-benchmarks)
+    - [Test Configuration](#test-configuration)
+    - [Performance Results (N=500 files)](#performance-results-n500-files)
+    - [Detailed Analysis](#detailed-analysis)
+    - [Performance Scaling](#performance-scaling)
+  - [Performance Testing](#performance-testing)
 - [For Theme Developers](#for-theme-developers)
   - [Step 1: Create Content Partial](#step-1-create-content-partial)
   - [Step 2: Update Templates](#step-2-update-templates)
@@ -327,6 +334,70 @@ For support, visit [[contact-us]].
   pattern = "^.*$"
   url = "/broken-link/"
   class = "broken-link"
+```
+
+## Performance
+
+Hugo SmartLink includes comprehensive performance testing to ensure optimal build times. The module supports different caching strategies to balance functionality with performance.
+
+### Performance Benchmarks
+
+We've conducted extensive performance testing with various configurations and content sizes. Here are the results:
+
+#### Test Configuration
+
+- **Test Environment**: Hugo 0.127.0 on macOS
+- **Content**: 500 test files with wiki link syntax
+- **SmartLinks per file**: 166 SmartLinks per test file
+- **Total SmartLinks**: 83,000 SmartLinks (500 files × 166 links)
+- **Measurement**: 5 runs with hyperfine, warmup included
+- **Cache**: Public directory cleared between runs
+
+#### Performance Results (N=500 files)
+
+| Configuration | Build Time | Performance vs Baseline |
+|---------------|------------|------------------------|
+| **Complete Disable** | 294ms | 1.0x (baseline) |
+| **SmartLink + Cache** | 922ms | 3.13x slower |
+| **Shortcode Only Disable** | 900ms | 3.06x slower |
+| **SmartLink + No Cache** | 1.26s | 4.29x slower |
+
+#### Detailed Analysis
+
+**Complete Disable** (SmartLink functionality removed):
+- No regex processing overhead
+
+**SmartLink + Cache** (Default):
+- Uses Hugo's `partialCached` for optimal performance
+- 27% faster than no-cache version
+
+**Shortcode Only Disable**:
+- Disables only the shortcode processing
+- Content regex processing still occurs
+- Similar performance to cached version but without functionality
+
+**SmartLink + No Cache**:
+- Slowest option due to repeated regex processing
+
+#### Performance Scaling
+
+Performance impact scales with content size:
+
+| Content Size | SmartLinks per File | Total SmartLinks | Complete Disable | SmartLink + Cache | Performance Ratio |
+|--------------|-------------------|------------------|------------------|-------------------|-------------------|
+| 20 files | 166 | 3,320 | 62ms | 90ms | 1.45x |
+| 50 files | 166 | 8,300 | 73ms | 140ms | 1.91x |
+| 200 files | 166 | 33,200 | 154ms | 402ms | 2.61x |
+| 500 files | 166 | 83,000 | 294ms | 922ms | 3.13x |
+
+### Performance Testing
+
+The project includes a comprehensive performance testing framework:
+
+```bash
+# Run performance tests
+cd test
+make test-perf N_COPIES=100
 ```
 
 ## For Theme Developers
