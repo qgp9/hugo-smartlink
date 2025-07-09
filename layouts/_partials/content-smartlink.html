@@ -1,14 +1,38 @@
 {{- $smartlink := site.Params.modules.smartlink -}}
 {{- $output := $smartlink.output | default "html" -}}
-{{- $normalizeEscaped := $smartlink.normalizeEscapedWikilink | default true -}}
+{{- $protectCodeBlocks := .Params.protectCodeBlocks | default ($smartlink.protectCodeBlocks | default false) -}}
+{{- $normalizeEscaped := .Params.normalizeEscapedWikilink | default ($smartlink.normalizeEscapedWikilink | default true) -}}
+{{- $maxCodeBlockIterations := .Params.maxCodeBlockIterations | default ($smartlink.maxCodeBlockIterations | default 50) -}}
 {{- $content := "" -}}
+
 {{- if not (in .Content "[[") -}}
     {{- $content = .Content -}}
 {{- else if eq $output "html" -}}
-    {{- $wikilinks := findRE `\[\[[^]]+\]\]` .Content | uniq -}}
     {{- $content = .Content -}}
+    
+    {{- /* Code block protection */ -}}
+    {{- $mapping := slice -}}
+    {{- if $protectCodeBlocks -}}
+        {{- $pattern := `(<pre[^>]*>[\s\S]*?</pre>)|(<code[^>]*>[\s\S]*?</code>)` -}}
+        
+        {{- /* Process nested code blocks */ -}}
+        {{- range $i := seq $maxCodeBlockIterations -}}
+            {{- $matches := $content | findRE $pattern | uniq -}}
+            {{- if not $matches -}}
+                {{- break -}}
+            {{- end -}}
+            {{- range $j, $match := $matches -}}
+                {{- $key := len $mapping -}}
+                {{- $mapping = $mapping | append $match -}}
+                {{- $content = replace $content $match (printf "SMARTLINK_PROTECTED_%d" $key) -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    
+    {{- /* SmartLink processing */ -}}
+    {{- $wikilinks := findRE `\[\[[^]]+\]\]` $content | uniq -}}
     {{- range $wikilink := $wikilinks -}}
-        {{- if findRE `/\S+>` $wikilink -}}
+        {{- if findRE `/\S+?>` $wikilink -}}
             {{- continue -}}
         {{- end -}}
         {{- $link := trim $wikilink "[] " -}}
@@ -18,9 +42,18 @@
         {{- $processed := partialCached "smartlink" $link $link -}}
         {{- $content = replace $content $wikilink $processed -}}
     {{- end -}}
+    
+    {{- /* Restore code blocks */ -}}
+    {{- if $protectCodeBlocks -}}
+        {{- range $i := ($mapping | len | seq 0 | collections.Reverse) -}}
+            {{- $content = replace $content (printf "SMARTLINK_PROTECTED_%d" $i) (index $mapping $i ) -}}
+        {{- end -}}
+    {{- end -}}
+    
 {{- else -}}
     {{- $content = .RenderString (replaceRE `\[\[(\s*[^]\s][^]]*)]]` "{{% smartlink `$1` %}}" .RawContent) -}}
 {{- end -}}
+
 {{- if $normalizeEscaped -}}
     {{- $content = replaceRE `\[\\\[(.*?)]]` "[[$1]]" $content -}}
 {{- end -}}

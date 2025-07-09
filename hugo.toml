@@ -7,6 +7,8 @@
     
     # Normalize escaped wikilinks (e.g., \[\[link\]\] -> [[link]])
     normalizeEscapedWikilink = true
+    protectCodeBlocks = false
+    maxCodeBlockIterations = 50
     
     # URL prefix aliases for mapping
     [params.modules.smartlink.prefixAlias]

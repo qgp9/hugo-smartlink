@@ -272,7 +272,7 @@ Control whether escaped wiki links are normalized for documentation:
 [params]
   [params.modules]
     [params.modules.smartlink]
-      normalizeEscapedWikilink = true  # Default: true
+      normalizeEscapedWikilink = true  # Default: true (HTML output only)
 ```
 
 **Examples:**
@@ -280,9 +280,63 @@ Control whether escaped wiki links are normalized for documentation:
 - `normalizeEscapedWikilink = true`: `[\[wikilink]]` → `[[wikilink]]` (for documentation)
 - `normalizeEscapedWikilink = false`: `[\[wikilink]]` → `[\[wikilink]]` (performance optimized)
 
+**Important Notes:**
+- **HTML Output Only**: This feature only works with `output = "html"` (default)
+- **Performance Impact**: When enabled, adds processing overhead for escaped link detection. On large documents or many links, this can noticeably slow down build times.
+- **Documentation Use**: Primarily useful when showing wiki link syntax in documentation
+- **Page-Level Override**: Can be overridden per page using front matter
+
 **Use cases:**
 - **`true`**: When you need to show wiki link syntax in documentation
 - **`false`**: For better performance when escaped links are not needed
+
+#### Code Block Protection
+
+Protect code blocks from SmartLink processing:
+
+```toml
+[params]
+  [params.modules]
+    [params.modules.smartlink]
+      protectCodeBlocks = false  # Default: false (performance optimized)
+      maxCodeBlockIterations = 50  # Default: 50 (nested processing depth)
+```
+
+**Examples:**
+
+- `protectCodeBlocks = true`: Code blocks with `[[wikilink]]` are preserved
+- `protectCodeBlocks = false`: All content is processed (faster)
+
+**Important Notes:**
+- **Performance Impact**: When enabled, significantly slows down processing due to complex regex operations
+- **Nested Processing**: `maxCodeBlockIterations` controls how deep nested code blocks are processed
+- **Page-Level Override**: Can be overridden per page using front matter
+- **Recommendation**: Keep disabled by default, enable only for documentation pages
+
+#### Page-Level Configuration
+
+You can override any SmartLink settings per page using front matter:
+
+```markdown
+---
+title: "SmartLink Documentation"
+protectCodeBlocks: true
+normalizeEscapedWikilink: true
+maxCodeBlockIterations: 10
+---
+
+This page will have code block protection and escaped link normalization enabled.
+```
+
+**Front Matter Options:**
+- `protectCodeBlocks`: Enable/disable code block protection
+- `normalizeEscapedWikilink`: Enable/disable escaped link normalization  
+- `maxCodeBlockIterations`: Set nested processing depth (1-50)
+
+**Priority Order:**
+1. Page front matter (highest priority)
+2. Site configuration (`hugo.toml`)
+3. Default values (lowest priority)
 
 ## Usage Examples
 
