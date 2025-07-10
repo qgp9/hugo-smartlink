@@ -1,4 +1,0 @@
-{{- $key := .Get 0 -}}
-{{- with $.Page -}}
-    {{- default (.Param (printf "smartlink.%s" $key)) (.Param (printf "modules.smartlink.%s" $key)) -}}
-{{- end -}} 
