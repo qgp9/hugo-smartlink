@@ -1,4 +1,5 @@
-{{- $linkTextOrg := . -}}
+{{- $linkTextOrg := .link -}}
+{{- $config := .config -}}
 {{- $linkText := $linkTextOrg | strings.TrimPrefix "[[" | strings.TrimSuffix "]]" | strings.TrimSpace -}}
 
 {{- /* split link text into path */ -}}
@@ -12,11 +13,10 @@
 {{- end -}}
 
 {{- /* Check prefixAlias */ -}}
-{{- $smartlink := site.Params.modules.smartlink -}}
-{{- with $smartlink.prefixAlias -}}
+{{- with $config.prefixalias -}}
     {{- range $key, $value := . -}}
         {{- if hasPrefix $path $key -}}
-            {{- $path = replace $path $key $value -}}
+            {{- $path = printf "%s%s" $value (strings.TrimPrefix $key $path) -}}
             {{- break -}}
         {{- end -}}
     {{- end -}}
@@ -31,19 +31,19 @@
 
 {{- /* Loop through smartlink rules */}}
 {{- $matched := false -}}
-{{- range $smartlink.rules -}}
+{{- range $config.rules -}}
     {{- $match := slice $path -}}
     {{- /* If pattern is not set, match any path */ -}}
     {{- /* if not matched, early continue */ -}}
     {{- if .pattern -}}
         {{- $match = index (findRESubmatch .pattern $path) 0 -}}
         {{- if not $match -}}
-            {{- $matched := false -}}
+            {{- $matched = false -}}
             {{- continue -}}
         {{- end -}}
     {{- end -}}
     {{- /* Now matched */ -}}
-    {{- $matched := true -}}
+    {{- $matched = true -}}
     {{- if .wikiLink -}}
         {{- $stripNamespace = or .stripNamespace $stripNamespace -}}
         {{- $_parts := split $path "#" -}}

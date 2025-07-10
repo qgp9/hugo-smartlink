@@ -2,8 +2,7 @@
 {{- $path := $link.path -}}
 {{- $label := $link.label -}}
 {{- $class := $link.class -}}
-{{- $smartlink := site.Params.modules.smartlink -}}
-{{- $output := $smartlink.output | default "html" -}}
+{{- $output := .config.output -}}
 {{- if eq $output "html" -}}
 <a href="{{$path}}"{{if $class}} class="{{$class}}"{{end}}>{{$label}}</a>
 {{- else -}}

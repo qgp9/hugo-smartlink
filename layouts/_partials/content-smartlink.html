@@ -1,22 +1,36 @@
-{{- $smartlink := site.Params.modules.smartlink -}}
-{{- $output := $smartlink.output | default "html" -}}
-{{- $protectCodeBlocks := .Params.protectCodeBlocks | default ($smartlink.protectCodeBlocks | default false) -}}
-{{- $normalizeEscaped := .Params.normalizeEscapedWikilink | default ($smartlink.normalizeEscapedWikilink | default true) -}}
-{{- $maxCodeBlockIterations := .Params.maxCodeBlockIterations | default ($smartlink.maxCodeBlockIterations | default 50) -}}
+{{- /* Merge SmartLink configuration with priority: front matter > site params > defaults */ -}}
+{{- $defaultConfig := dict 
+    "output" "html"
+    "protectcodeblocks" false
+    "normalizeescapedwikilink" true
+    "maxcodeblockiterations" 50
+    "prefixalias" dict
+    "rules" slice
+-}}
+{{- $config := collections.Merge 
+    $defaultConfig 
+    (site.Params.modules.smartlink | default dict)
+    (.Params.smartlink | default dict)
+    (.Params.modules.smartlink | default dict)
+    (dict)
+-}}
+{{- .Store.Set "smartlink_config" $config -}}
+
+{{- /* Process content */ -}}
 {{- $content := "" -}}
 
 {{- if not (in .Content "[[") -}}
     {{- $content = .Content -}}
-{{- else if eq $output "html" -}}
+{{- else if eq $config.output "html" -}}
     {{- $content = .Content -}}
     
     {{- /* Code block protection */ -}}
     {{- $mapping := slice -}}
-    {{- if $protectCodeBlocks -}}
+    {{- if $config.protectcodeblocks -}}
         {{- $pattern := `(<pre[^>]*>[\s\S]*?</pre>)|(<code[^>]*>[\s\S]*?</code>)` -}}
         
         {{- /* Process nested code blocks */ -}}
-        {{- range $i := seq $maxCodeBlockIterations -}}
+        {{- range $i := seq $config.maxcodeblockiterations -}}
             {{- $matches := $content | findRE $pattern | uniq -}}
             {{- if not $matches -}}
                 {{- break -}}
@@ -39,12 +53,12 @@
         {{- if not $link -}}
             {{- continue -}}
         {{- end -}}
-        {{- $processed := partialCached "smartlink" $link $link -}}
+        {{- $processed := partialCached "smartlink" (dict "link" $link "config" $config) $link -}}
         {{- $content = replace $content $wikilink $processed -}}
     {{- end -}}
     
     {{- /* Restore code blocks */ -}}
-    {{- if $protectCodeBlocks -}}
+    {{- if $config.protectcodeblocks -}}
         {{- range $i := ($mapping | len | seq 0 | collections.Reverse) -}}
             {{- $content = replace $content (printf "SMARTLINK_PROTECTED_%d" $i) (index $mapping $i ) -}}
         {{- end -}}
@@ -54,7 +68,9 @@
     {{- $content = .RenderString (replaceRE `\[\[(\s*[^]\s][^]]*)]]` "{{% smartlink `$1` %}}" .RawContent) -}}
 {{- end -}}
 
-{{- if $normalizeEscaped -}}
+{{- if $config.normalizeescapedwikilink -}}
     {{- $content = replaceRE `\[\\\[(.*?)]]` "[[$1]]" $content -}}
 {{- end -}}
+
 {{- $content | safeHTML -}}
+{{- $config | jsonify -}}

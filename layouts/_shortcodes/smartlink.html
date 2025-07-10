@@ -1,2 +1,3 @@
 {{- $linkText := (.Get 0) -}}
-{{- partialCached "smartlink" $linkText $linkText -}}
+{{- $config := $.Page.Store.Get "smartlink_config" -}}
+{{- partialCached "smartlink" (dict "link" $linkText "config" $config) $linkText -}}

@@ -25,6 +25,8 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
 - 🎯 **Pattern Matching**: Support for custom link patterns (JIRA, GitHub issues, etc.)
 - 🧹 **Namespace Stripping**: Clean up link labels automatically
 - 🛡️ **Fallback Handling**: Graceful handling of broken links
+- ⚙️ **Configuration Merging**: Intelligent merging of site and page-level configurations
+- 🚀 **Performance Optimized**: Efficient caching and processing for large content sites
 
 <!-- omit from toc -->
 ## Table of Contents
@@ -43,6 +45,9 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
     - [Output Format](#output-format)
     - [Prefix Aliases](#prefix-aliases)
     - [Escaped Wiki Link Normalization](#escaped-wiki-link-normalization)
+    - [Code Block Protection](#code-block-protection)
+    - [Page-Level Configuration](#page-level-configuration)
+    - [Configuration Merging](#configuration-merging)
 - [Usage Examples](#usage-examples)
   - [Wiki-Style Links](#wiki-style-links)
   - [External System Links](#external-system-links)
@@ -128,7 +133,7 @@ If you want to see what the default configuration looks like:
       [[params.modules.smartlink.rules]]
         name = "Broken Link"
         pattern = "^.*$"
-        url = "/broken-link/"
+        url = "/broken-link/?path={0}"
         class = "broken-link" # Only used when output: html
 ```
 
@@ -338,6 +343,37 @@ This page will have code block protection and escaped link normalization enabled
 2. Site configuration (`hugo.toml`)
 3. Default values (lowest priority)
 
+#### Configuration Merging
+
+SmartLink uses Hugo's `collections.Merge` to combine configurations from multiple sources with proper priority:
+
+```toml
+# Site-level configuration (hugo.toml)
+[params.modules.smartlink]
+  output = "html"
+  [params.modules.smartlink.prefixAlias]
+    "~" = "/doc/"
+
+# Page-level configuration (front matter)
+---
+smartlink:
+  output: "markdown"
+  prefixAlias:
+    "docs:" = "/documentation/"
+---
+```
+
+**Merge Priority (highest to lowest):**
+1. Page front matter (`smartlink` namespace)
+2. Site configuration (`params.modules.smartlink`)
+3. Default values
+
+**Important Notes:**
+- **Case Handling**: Hugo's `collections.Merge` converts keys to lowercase internally
+- **Key Access**: Always use lowercase keys when accessing merged configuration
+- **TOML Keys**: Front matter and TOML keys remain unchanged (case-sensitive)
+- **Internal Processing**: Only internal configuration access uses lowercase keys
+
 ## Usage Examples
 
 ### Wiki-Style Links
@@ -513,6 +549,7 @@ make test-perf N_COPIES=100 V=1
 3. **Choose output format wisely**: HTML output is 46% faster than baseline, Markdown is 7% faster
 4. **Monitor build times**: Use performance testing for large content changes
 5. **Consider content size**: Performance scales linearly with SmartLink density
+6. **Optimize configuration**: Use page-level overrides sparingly for better caching
 
 ## For Theme Developers
 

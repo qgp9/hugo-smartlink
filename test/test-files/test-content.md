@@ -118,11 +118,11 @@ title: SmartLink Test Content
 ## Edge Cases and Error Handling
 
 ### Non-existent Pages (Should use broken link fallback)
-* `[\[non-existent-page]]` ||| [[non-existent-page]] ||| {{< expected_a href="/broken-link/" label="non-existent-page" class="broken-link" output="markdown" >}}
-* `[\[non-existent-page]]` ||| [[non-existent-page]] ||| {{< expected_a href="/broken-link/" label="non-existent-page" class="broken-link" output="html" >}}
+* `[\[non-existent-page]]` ||| [[non-existent-page]] ||| {{< expected_a href="/broken-link/?path=non-existent-page" label="non-existent-page" class="broken-link" output="markdown" >}}
+* `[\[non-existent-page]]` ||| [[non-existent-page]] ||| {{< expected_a href="/broken-link/?path=non-existent-page" label="non-existent-page" class="broken-link" output="html" >}}
 
-* `[\[missing-docs/guide]]` ||| [[missing-docs/guide]] ||| {{< expected_a href="/broken-link/" label="guide" class="broken-link" output="markdown" >}}
-* `[\[missing-docs/guide]]` ||| [[missing-docs/guide]] ||| {{< expected_a href="/broken-link/" label="guide" class="broken-link" output="html" >}}
+* `[\[missing-docs/guide]]` ||| [[missing-docs/guide]] ||| {{< expected_a href="/broken-link/?path=missing-docs/guide" label="guide" class="broken-link" output="markdown" >}}
+* `[\[missing-docs/guide]]` ||| [[missing-docs/guide]] ||| {{< expected_a href="/broken-link/?path=missing-docs/guide" label="guide" class="broken-link" output="html" >}}
 
 ### Empty or Invalid Links
 * `[[]]` ||| [[]] ||| SHOULD_SUCCESS ||| [[]]

@@ -11,7 +11,8 @@
     maxCodeBlockIterations = 50
     
     # URL prefix aliases for mapping
-    [params.modules.smartlink.prefixAlias]
+    prefixAlias = {}
+    # [params.modules.smartlink.prefixAlias]
       # Example: "github:" -> "https://github.com/"
       # "docs:" -> "/docs/"
     
@@ -25,5 +26,5 @@
     [[params.modules.smartlink.rules]]
       name = "Broken Link"
       pattern = "^.*$"
-      url = "/broken-link/"
+      url = "/broken-link/?path={0}"
       class = "broken-link"

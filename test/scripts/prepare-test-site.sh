@@ -89,7 +89,7 @@ title = "SmartLink Test Site"
       [[params.modules.smartlink.rules]]
         name = "Broken Link"
         pattern = "^.*$"
-        url = "/broken-link/"
+        url = "/broken-link/?path={0}"
         class = "broken-link"
 EOF
 }
