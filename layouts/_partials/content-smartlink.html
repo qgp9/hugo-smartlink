@@ -19,22 +19,39 @@
     (.Params.modules.smartlink | default dict)
     (dict)
 -}}
+{{- $_labelRules := slice -}}
+{{- range $k, $v := dict "usePageTitle" $config.usepagetitleprefixes "stripNamespace" $config.stripnamespaceprefixes -}}
+    {{- range $v -}}
+        {{- $prefix := . -}}
+        {{- $body := "{0}" -}}
+        {{- if hasPrefix $prefix "-" -}}
+            {{- $prefix = strings.TrimPrefix "-" $prefix -}}
+            {{- $body = "{1}" -}}
+        {{- end -}}
+        {{- $_labelRules = $_labelRules | append (dict
+            "name" $prefix 
+            "prefix" $prefix
+            "url" $body 
+            "label" $body
+            $k true) -}}
+    {{- end -}}
+{{- end -}}
 {{- $_prefixAliasKeys := slice -}}
 {{- range $k, $v := $config.prefixalias -}}
     {{- $_prefixAliasKeys = $_prefixAliasKeys | append $k -}}
 {{- end -}}
-{{- $_prefixRule1 := dict
-    "name" "user"
-    "pattern" `^user:(.*)$`
-    "url" "/users/{1}"
-    "label" "/users/{1}"
-    -}}
+{{- $_aliasRule := slice -}}
+{{- range $k, $v := $config.prefixalias -}}
+    {{- $_aliasRule = $_aliasRule | append (dict
+        "name" $k 
+        "prefix" $k 
+        "url" (printf "%s{1}" $v) 
+        "label" (printf "%s{1}" $v)) -}}
+{{- end -}}
 {{- $config = merge $config (dict 
     "_prefixaliaskeys" $_prefixAliasKeys 
-    "_prefixesall" ($_prefixAliasKeys | append $config.stripnamespaceprefixes | append $config.usepagetitleprefixes | uniq)
-    "_prefixlabels" (slice | append $config.stripnamespaceprefixes | append $config.usepagetitleprefixes | uniq)
-    "_rulesarray" (slice (slice $_prefixRule1) $config.rules)
-    ) -}}
+    "_rulesarray" (slice $_labelRules $_aliasRule $config.rules)
+    ) (dict) -}}
 
 {{- .Store.Set "smartlink_config" $config -}}
 

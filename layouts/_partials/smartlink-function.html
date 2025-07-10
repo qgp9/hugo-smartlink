@@ -6,26 +6,8 @@
 {{- $_linkParts := split $linkText "|" -}}
 {{- $path := index $_linkParts 0 | strings.TrimSpace -}}
 
-{{- $prefixes := $config._prefixesall -}}
-{{- /* find and remove prefixes from path by depth 2 */ -}}
-{{- $prefixLabel := "" -}}
-{{- range $config._prefixlabels -}}
-    {{- $prefix := strings.TrimPrefix "-" . -}}
-    {{- if hasPrefix $path $prefix -}}
-        {{- if hasPrefix . "-" -}}
-            {{- $path = strings.TrimPrefix $prefix $path -}}
-        {{- end -}}
-        {{- $prefixLabel = . -}}
-        {{- break -}}
-    {{- end -}}
-{{- end -}}
-{{- range $k, $v := $config.prefixalias -}}
-    {{- if hasPrefix $path $k -}}
-        {{- $path = strings.TrimPrefix $k $path -}}
-        {{- $path = printf "%s%s" $v $path -}}
-        {{- break -}}
-    {{- end -}}
-{{- end -}}
+{{- $usePageTitle := or $config.usepagetitle false -}}
+{{- $stripNamespace := false -}}
 
 {{- /* Set label from custom label or path */ -}}
 {{- $hasLabel := or (strings.TrimSpace (index $_linkParts 1)) false -}}
@@ -39,30 +21,26 @@
     {{- /* Loop through smartlink rules */}}
     {{- $matchedRule := false -}}
     {{- range . -}}
-        {{- $match := slice $path -}}
+        {{- $match := false -}}
         {{- /* If pattern is not set, match any path */ -}}
         {{- /* if not matched, early continue */ -}}
-        {{- if .pattern -}}
-            {{- $match = index (findRESubmatch .pattern $path) 0 -}}
-            {{- if not $match -}}
-                {{- $matchedRule = false -}}
-                {{- continue -}}
+        {{- if .prefix -}}
+            {{- if hasPrefix $path .prefix -}}
+                {{- $match = slice $path (strings.TrimPrefix .prefix $path) -}}
             {{- end -}}
+        {{- else if .pattern -}}
+            {{- $match = index (findRESubmatch .pattern $path) 0 -}}
+        {{- else -}}
+            {{- $match = slice $path -}}
+        {{- end -}}
+        {{- if not $match -}}
+            {{- continue -}}
         {{- end -}}
         {{- /* Now matched */ -}}
         {{- $matchedRule = true -}}
         {{- if .wikiLink -}}
             {{- /* Check if usePageTitle */}}
-            {{- $usePageTitle := or $config.usepagetitle false -}} {{- /* usePageTitle is global option */}}
-            {{- $stripNamespace := or .stripNamespace false -}}    {{- /* stripNamespace is rule option */}}
-            {{- if and $prefixLabel (not $hasLabel) -}} {{- /* use label if provided */}}
-                {{- if in $config.usepagetitleprefixes $prefixLabel -}}
-                    {{- $usePageTitle = true -}}
-                {{- else if in $config.stripnamespaceprefixes $prefixLabel -}}
-                    {{- $stripNamespace = true -}}
-                {{- end -}}
-            {{- end -}}
-
+            {{- $stripNamespace = or $stripNamespace .stripNamespace -}}    {{- /* stripNamespace is rule option */}}
             {{- /* Process path = main + anchor */ -}}
             {{- $_parts := split $path "#" -}}
             {{- $main := index $_parts 0 -}}
@@ -92,10 +70,14 @@
                 {{- $path = (printf "%s%s%s" $page.RelPermalink $anchorHead $anchor) -}}
 
                 {{- /* Handel Label */ -}}
-                {{- if $usePageTitle -}}
-                    {{- $label = $page.Title -}}
-                {{- else if $stripNamespace -}}
-                    {{- $label = replaceRE "^.*/" "" $label -}}
+                {{- if not $hasLabel -}}
+                    {{- if $usePageTitle -}}
+                        {{- $label = $page.Title -}}
+                        {{- $hasLabel = true -}}
+                    {{- else if $stripNamespace -}}
+                        {{- $label = replaceRE "^.*/" "" $label -}}
+                        {{- $hasLabel = true -}}
+                    {{- end -}}
                 {{- end -}}
             {{- end -}}
         {{- end -}}
@@ -113,6 +95,8 @@
         {{- end -}}
         {{- if $matchedRule -}}
             {{- if .class -}} {{- $class = .class -}} {{- end -}}
+            {{- $usePageTitle = .usePageTitle | default $usePageTitle -}}
+            {{- $stripNamespace = .stripNamespace | default $stripNamespace -}}
             {{- break -}}
         {{- end -}}
     {{- end -}}
