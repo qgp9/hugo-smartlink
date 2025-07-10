@@ -1,59 +1,87 @@
 {{- /* Merge SmartLink configuration with priority: front matter > site params > defaults */ -}}
-{{- $defaultConfig := dict 
-    "output" "html"
-    "protectcodeblocks" false
-    "normalizeescapedwikilink" true
-    "maxcodeblockiterations" 50
-    "prefixalias" dict
-    "rules" slice
-    "disable" false
-    "supportexts" (slice "md")
-    "usepagetitle" false
-    "usepagetitleprefixes" (slice)
-    "stripnamespaceprefixes" (slice)
--}}
-{{- $config := collections.Merge 
-    $defaultConfig 
-    (site.Params.modules.smartlink | default dict)
-    (.Params.smartlink | default dict)
-    (.Params.modules.smartlink | default dict)
-    (dict)
--}}
-{{- $_labelRules := slice -}}
-{{- range $k, $v := dict "usePageTitle" $config.usepagetitleprefixes "stripNamespace" $config.stripnamespaceprefixes -}}
-    {{- range $v -}}
+{{- define "_partials/smartlink-build-label-rules.html" -}}
+    {{- $labelRules := slice -}}
+    {{- $name := .name -}}
+    {{- range .prefixes -}}
         {{- $prefix := . -}}
         {{- $body := "{0}" -}}
         {{- if hasPrefix $prefix "-" -}}
             {{- $prefix = strings.TrimPrefix "-" $prefix -}}
             {{- $body = "{1}" -}}
         {{- end -}}
-        {{- $_labelRules = $_labelRules | append (dict
+        {{- $labelRules = $labelRules | append (dict
             "name" $prefix 
             "prefix" $prefix
             "url" $body 
             "label" $body
-            $k true) -}}
+            $name true) -}}
     {{- end -}}
+    {{- return $labelRules -}}
 {{- end -}}
-{{- $_prefixAliasKeys := slice -}}
-{{- range $k, $v := $config.prefixalias -}}
-    {{- $_prefixAliasKeys = $_prefixAliasKeys | append $k -}}
-{{- end -}}
-{{- $_aliasRule := slice -}}
-{{- range $k, $v := $config.prefixalias -}}
-    {{- $_aliasRule = $_aliasRule | append (dict
-        "name" $k 
-        "prefix" $k 
-        "url" (printf "%s{1}" $v) 
-        "label" (printf "%s{1}" $v)) -}}
-{{- end -}}
-{{- $config = merge $config (dict 
-    "_prefixaliaskeys" $_prefixAliasKeys 
-    "_rulesarray" (slice $_labelRules $_aliasRule $config.rules)
-    ) (dict) -}}
 
-{{- .Store.Set "smartlink_config" $config -}}
+{{- define "_partials/smartlink-build-alias-rules.html" -}}
+    {{- $aliasRules := slice -}}
+    {{- range $k, $v := . -}}
+        {{- $aliasRules = $aliasRules | append (dict
+            "name" $k
+            "prefix" $k
+            "url" (printf "%s{1}" $v)
+            "label" (printf "%s{1}" $v)
+            ) -}}
+    {{- end -}}
+    {{- return $aliasRules -}}
+{{- end -}}
+
+{{- define "_partials/smartlink-build-rules-config.html" -}}
+    {{- $trigger := .trigger -}}
+    {{- $config := .config -}}
+    {{- $rules0 := slice -}}
+    {{- $rules1 := slice -}}
+    {{- if $trigger.usepagetitleprefixes -}}
+        {{- $rules0 = $rules0 | append (partial "smartlink-build-label-rules" (dict "name" "usePageTitle" "prefixes" $config.usepagetitleprefixes)) -}}
+    {{- end -}}
+    {{- if $trigger.stripnamespaceprefixes -}}
+        {{- $rules0 = $rules0 | append (partial "smartlink-build-label-rules" (dict "name" "stripNamespace" "prefixes" $config.stripnamespaceprefixes)) -}}
+    {{- end -}}
+    {{- if $trigger.prefixalias -}}
+        {{- $rules1 = $rules1 | append (partial "smartlink-build-alias-rules" $trigger.prefixalias) -}}
+    {{- end -}}
+    {{- if $rules0 -}}
+        {{- $config = collections.Merge $config (dict "rules0" $rules0) -}}
+    {{- end -}}
+    {{- if $rules1 -}}
+        {{- $config = collections.Merge $config (dict "rules1" $rules1) -}}
+    {{- end -}}
+    {{- return $config -}}
+{{- end -}}
+
+{{- $config := site.Store.Get "smartlink_config_site" | default dict -}}
+{{- if not $config -}}
+    {{- $config = dict 
+        "output" "html"
+        "protectcodeblocks" false
+        "normalizeescapedwikilink" true
+        "maxcodeblockiterations" 50
+        "prefixalias" dict
+        "rules0" slice
+        "rules1" slice
+        "rules" slice
+        "rulesAfter" slice
+        "disable" false
+        "supportexts" (slice "md")
+        "usepagetitle" false
+        "usepagetitleprefixes" (slice)
+        "stripnamespaceprefixes" (slice)
+        "_rulesarray" (slice)
+    -}}
+    {{- $config = collections.Merge $config (site.Params.modules.smartlink | default dict) dict -}}
+    {{- $config = collections.Merge $config (partial "smartlink-build-rules-config" (dict "trigger" $config "config" $config)) -}}
+    {{- site.Store.Set "smartlink_config_site" $config -}}
+{{- end -}}
+
+{{- $pageConfig := collections.Merge (.Params.smartlink | default dict) (.Params.modules.smartlink | default dict) dict -}}
+{{- $config = collections.Merge $config $pageConfig -}}
+{{- $config = collections.Merge $config (partial "smartlink-build-rules-config" (dict "trigger" $pageConfig "config" $config)) dict -}}
 
 {{- /* Check if SmartLink is disabled */ -}}
 {{- if $config.disable -}}
@@ -98,7 +126,7 @@
             {{- if not $link -}}
                 {{- continue -}}
             {{- end -}}
-            {{- $processed := partialCached "smartlink" (dict "link" $link "config" $config) $link -}}
+            {{- $processed := partialCached "smartlink" (dict "link" $link "config" $config) $link $pageConfig -}}
             {{- $content = replace $content $wikilink $processed -}}
         {{- end -}}
         
@@ -109,6 +137,8 @@
             {{- end -}}
         {{- end -}}
     {{- else -}}
+        {{- /* For markdown shortcodes, we need to set the config in the page store */ -}}
+        {{- .Store.Set "smartlink_config" $config -}}
         {{- $content = .RenderString (replaceRE `\[\[(\s*[^]\s][^]]*)]]` "{{% smartlink `$1` %}}" .RawContent) -}}
     {{- end -}}
 

@@ -17,7 +17,7 @@
 {{- $class := "" -}}
 
 {{- /* Loop through rules array */ -}}
-{{- range $config._rulesarray -}}
+{{- range slice $config.rules0 $config.rules1 $config.rules $config.rulesAfter -}}
     {{- /* Loop through smartlink rules */}}
     {{- $matchedRule := false -}}
     {{- range . -}}
