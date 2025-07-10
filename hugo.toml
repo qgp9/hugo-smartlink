@@ -7,10 +7,15 @@
     disable = false
     # Supported file extensions for SmartLink processing
     supportExts = ["md"]
+    # Use page title as label when no custom label is provided
+    usePageTitle = false
+    # Use page title as label for links with these prefixes
+    usePageTitlePrefixes = []
     # Normalize escaped wikilinks (e.g., \[\[link\]\] -> [[link]])
     normalizeEscapedWikilink = true
     protectCodeBlocks = false
     maxCodeBlockIterations = 50
+    stripNamespacePrefixes = []
     # URL prefix aliases for mapping
     [params.modules.smartlink.prefixAlias]
       # Example: "github:" -> "https://github.com/"

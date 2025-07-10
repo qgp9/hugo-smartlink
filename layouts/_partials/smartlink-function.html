@@ -6,23 +6,29 @@
 {{- $_linkParts := split $linkText "|" -}}
 {{- $path := index $_linkParts 0 | strings.TrimSpace -}}
 
-{{- /* Check inline "stripNamespace" prefix*/ -}}
-{{- $stripNamespace := hasPrefix $path "-" -}}
-{{- if $stripNamespace -}}
-    {{- $path = strings.TrimPrefix "-" $path  -}}
-{{- end -}}
-
-{{- /* Check prefixAlias */ -}}
-{{- with $config.prefixalias -}}
-    {{- range $key, $value := . -}}
-        {{- if hasPrefix $path $key -}}
-            {{- $path = printf "%s%s" $value (strings.TrimPrefix $key $path) -}}
+{{- $prefixes := $config._prefixesall -}}
+{{- /* find and remove prefixes from path by depth 2 */ -}}
+{{- $matchedPrefix := slice -}}
+{{- range 2 -}}
+    {{- range $prefixes -}}
+        {{- if hasPrefix $path . -}}
+            {{- $path = strings.TrimPrefix . $path -}}
+            {{- $matchedPrefix = $matchedPrefix | append . -}}
             {{- break -}}
         {{- end -}}
     {{- end -}}
+    {{- if not $matchedPrefix -}} {{- break -}} {{- end -}}
 {{- end -}}
 
-{{- /* Set label */ -}}
+{{- /* Handle prefixAlias */ -}}
+{{- range  $matchedPrefix -}}
+    {{- if and . (in $config.prefixalias .) -}}
+        {{- $path = printf "%s%s" (index $config.prefixalias .) $path -}}
+        {{- break -}}
+    {{- end -}}
+{{- end -}}
+
+{{- /* Set label from custom label or path */ -}}
 {{- $hasLabel := or (strings.TrimSpace (index $_linkParts 1)) false -}}
 {{- $label := strings.TrimSpace (or $hasLabel $path) -}}
 
@@ -30,7 +36,7 @@
 {{- $class := "" -}}
 
 {{- /* Loop through smartlink rules */}}
-{{- $matched := false -}}
+{{- $matchedRule := false -}}
 {{- range $config.rules -}}
     {{- $match := slice $path -}}
     {{- /* If pattern is not set, match any path */ -}}
@@ -38,39 +44,59 @@
     {{- if .pattern -}}
         {{- $match = index (findRESubmatch .pattern $path) 0 -}}
         {{- if not $match -}}
-            {{- $matched = false -}}
+            {{- $matchedRule = false -}}
             {{- continue -}}
         {{- end -}}
     {{- end -}}
     {{- /* Now matched */ -}}
-    {{- $matched = true -}}
+    {{- $matchedRule = true -}}
     {{- if .wikiLink -}}
-        {{- $stripNamespace = or .stripNamespace $stripNamespace -}}
+        {{- /* Check if usePageTitle */}}
+        {{- $usePageTitle := or $config.usepagetitle false -}} {{- /* usePageTitle is global option */}}
+        {{- $stripNamespace := or .stripNamespace false -}}    {{- /* stripNamespace is rule option */}}
+        {{- $prefix1 := (index $matchedPrefix 0) | default "" -}}
+        {{- if and $prefix1 (not $hasLabel) -}} {{- /* use label if provided */}}
+            {{- if in $config.usepagetitleprefixes $prefix1 -}}
+                {{- $usePageTitle = true -}}
+            {{- else if in $config.stripnamespaceprefixes $prefix1 -}}
+                {{- $stripNamespace = true -}}
+            {{- end -}}
+        {{- end -}}
+
+        {{- /* Process path = main + anchor */ -}}
         {{- $_parts := split $path "#" -}}
         {{- $main := index $_parts 0 -}}
         {{- $anchor := or (index $_parts 1) "" -}}
         {{- $anchorHead := and $anchor "#" -}}
-        {{- if and $stripNamespace (not $hasLabel) -}}
-            {{- $label = replaceRE "^.*/" "" $label -}}
-        {{- end -}}
+
         {{- if eq $main "" -}}
             {{- /* Main is empty, check if anchor is also empty */ -}}
             {{- if eq $anchor "" -}}
                 {{- /* Both main and anchor are empty, continue to next rule */ -}}
-                {{- $matched = false -}}
+                {{- $matchedRule = false -}}
                 {{- continue -}}
             {{- else -}}
                 {{- /* Main is empty but anchor exists, just use the anchor */ -}}
                 {{- $path = (print "#" $anchor) -}}
             {{- end -}}
         {{- else -}}
+            {{- /* Strip multiple slashes */ -}}
             {{- $main = strings.ReplaceRE `/+` "/" $main -}}
+
+            {{- /* Get page. If not found, continue to next rule */ -}}
             {{- $page := site.GetPage (replaceRE `\s+` "-" $main | lower) -}}
             {{- if not $page -}}
-                {{- $matched = false -}}
+                {{- $matchedRule = false -}}
                 {{- continue -}}
             {{- end -}}
-            {{- $path = (print $page.RelPermalink $anchorHead $anchor) -}}
+            {{- $path = (printf "%s%s%s" $page.RelPermalink $anchorHead $anchor) -}}
+
+            {{- /* Handel Label */ -}}
+            {{- if $usePageTitle -}}
+                {{- $label = $page.Title -}}
+            {{- else if $stripNamespace -}}
+                {{- $label = replaceRE "^.*/" "" $label -}}
+            {{- end -}}
         {{- end -}}
     {{- end -}}
     {{ if .url -}}
@@ -85,7 +111,7 @@
             {{- $label = replace $label (printf "{%d}" $i) $val -}}
         {{- end -}}
     {{- end -}}
-    {{- if $matched -}}
+    {{- if $matchedRule -}}
         {{- if .class -}} {{- $class = .class -}} {{- end -}}
         {{- break -}}
     {{- end -}}

@@ -49,6 +49,9 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
     - [Code Block Protection](#code-block-protection)
     - [Page-Level Configuration](#page-level-configuration)
     - [Configuration Merging](#configuration-merging)
+    - [Use Page Title as Label](#use-page-title-as-label)
+    - [Use Page Title for Specific Prefixes](#use-page-title-for-specific-prefixes)
+    - [Strip Namespace for Specific Prefixes](#strip-namespace-for-specific-prefixes)
 - [Usage Examples](#usage-examples)
   - [Wiki-Style Links](#wiki-style-links)
   - [External System Links](#external-system-links)
@@ -151,6 +154,7 @@ Customize Hugo SmartLink behavior with `modules.smartlink` and `modules.smartlin
       normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
       disable = false  # Disable SmartLink processing globally
       supportExts = ["md"]  # Supported file extensions for SmartLink processing
+      usePageTitle = false  # Use page title as label when no custom label is provided
       [params.modules.smartlink.prefixAlias]
         "~" = "/doc/"
         "docs:" = "/documentation/"
@@ -402,6 +406,63 @@ smartlink:
 - **Key Access**: Always use lowercase keys when accessing merged configuration
 - **TOML Keys**: Front matter and TOML keys remain unchanged (case-sensitive)
 - **Internal Processing**: Only internal configuration access uses lowercase keys
+
+#### Use Page Title as Label
+
+Control whether the page title is used as the label for wiki links:
+
+```toml
+[params]
+  [params.modules]
+    [params.modules.smartlink]
+      usePageTitle = true  # Use page title as label when no custom label is provided
+```
+
+- If `usePageTitle = true`, `[[some-page]]` will use the page's title as the link label.
+- If a custom label is provided (e.g., `[[some-page|Custom Label]]`), the custom label is always used.
+
+#### Use Page Title for Specific Prefixes
+
+You can use the page title as the label only for links with specific prefixes, even if `usePageTitle` is false:
+
+```toml
+[params]
+  [params.modules]
+    [params.modules.smartlink]
+      usePageTitle = false
+      usePageTitlePrefixes = ["doc:", "page:"]
+```
+
+- If a wiki link starts with any of the specified prefixes (e.g., `[[doc:my-page]]`), the page title will be used as the label (unless a custom label is provided).
+- This allows fine-grained control: use page title for some links, but not all.
+- You can combine this with `usePageTitle = true` for global or selective behavior.
+
+#### Strip Namespace for Specific Prefixes
+
+Control whether namespace prefixes are stripped from link labels for specific prefixes:
+
+```toml
+[params]
+  [params.modules]
+    [params.modules.smartlink]
+      stripNamespacePrefixes = ["docs:", "user:"]
+```
+
+- If a wiki link starts with any of the specified prefixes (e.g., `[[docs:guide/installation]]`), the namespace prefix will be stripped from the label.
+- The link will display as "installation" instead of "docs:guide/installation".
+- This works independently of the `stripNamespace` rule option.
+- You can use this for specific prefixes while keeping other prefixes intact.
+
+**Examples:**
+
+- `[[docs:guide/installation]]` → `[installation](/docs/guide/installation)`
+- `[[user:john/profile]]` → `[profile](/user/john/profile)`
+- `[[other:page]]` → `[other:page](/other/page)` (prefix not in list, no stripping)
+
+**Use Cases:**
+- **Documentation Links**: Strip "docs:" prefix for cleaner documentation links
+- **User Profiles**: Strip "user:" prefix for user profile links
+- **Selective Control**: Strip namespace for some prefixes but not others
 
 ## Usage Examples
 

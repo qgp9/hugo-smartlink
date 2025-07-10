@@ -8,6 +8,9 @@
     "rules" slice
     "disable" false
     "supportexts" (slice "md")
+    "usepagetitle" false
+    "usepagetitleprefixes" (slice)
+    "stripnamespaceprefixes" (slice)
 -}}
 {{- $config := collections.Merge 
     $defaultConfig 
@@ -16,6 +19,15 @@
     (.Params.modules.smartlink | default dict)
     (dict)
 -}}
+{{- $_prefixAliasKeys := slice -}}
+{{- range $k, $v := $config.prefixalias -}}
+    {{- $_prefixAliasKeys = $_prefixAliasKeys | append $k -}}
+{{- end -}}
+{{- $config = merge $config (dict 
+    "_prefixaliaskeys" $_prefixAliasKeys 
+    "_prefixesall" ($_prefixAliasKeys | append $config.stripnamespaceprefixes | append $config.usepagetitleprefixes | uniq)
+    ) -}}
+
 {{- .Store.Set "smartlink_config" $config -}}
 
 {{- /* Check if SmartLink is disabled */ -}}
