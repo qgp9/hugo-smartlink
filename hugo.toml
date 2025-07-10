@@ -4,15 +4,13 @@
   [params.modules.smartlink]
     # Output format for SmartLinks
     output = "html"
-    
+    disable = false
     # Normalize escaped wikilinks (e.g., \[\[link\]\] -> [[link]])
     normalizeEscapedWikilink = true
     protectCodeBlocks = false
     maxCodeBlockIterations = 50
-    
     # URL prefix aliases for mapping
-    prefixAlias = {}
-    # [params.modules.smartlink.prefixAlias]
+    [params.modules.smartlink.prefixAlias]
       # Example: "github:" -> "https://github.com/"
       # "docs:" -> "/docs/"
     

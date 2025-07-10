@@ -45,6 +45,7 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
     - [Output Format](#output-format)
     - [Prefix Aliases](#prefix-aliases)
     - [Escaped Wiki Link Normalization](#escaped-wiki-link-normalization)
+    - [Disable SmartLink Processing](#disable-smartlink-processing)
     - [Code Block Protection](#code-block-protection)
     - [Page-Level Configuration](#page-level-configuration)
     - [Configuration Merging](#configuration-merging)
@@ -118,6 +119,7 @@ If you want to see what the default configuration looks like:
     [params.modules.smartlink]
       output = "html"  # Default is now "html" for better performance and CSS support
       normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
+      disable = false  # Disable SmartLink processing globally
       [params.modules.smartlink.prefixAlias]
         "~" = "/doc/"
         "docs:" = "/documentation/"
@@ -147,6 +149,7 @@ Customize Hugo SmartLink behavior with `modules.smartlink` and `modules.smartlin
     [params.modules.smartlink]
       output = "html"  # "html" (default) or "markdown"
       normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
+      disable = false  # Disable SmartLink processing globally
       [params.modules.smartlink.prefixAlias]
         "~" = "/doc/"
         "docs:" = "/documentation/"
@@ -295,6 +298,29 @@ Control whether escaped wiki links are normalized for documentation:
 - **`true`**: When you need to show wiki link syntax in documentation
 - **`false`**: For better performance when escaped links are not needed
 
+#### Disable SmartLink Processing
+
+Disable SmartLink processing globally or per page:
+
+```toml
+[params]
+  [params.modules]
+    [params.modules.smartlink]
+      disable = false  # Default: false (enabled)
+```
+
+**Page-Level Disable (Front Matter):**
+
+```markdown
+---
+title: "My Page"
+smartlink:
+  disable: true
+---
+
+This page will not process any SmartLinks.
+```
+
 #### Code Block Protection
 
 Protect code blocks from SmartLink processing:
@@ -334,6 +360,7 @@ This page will have code block protection and escaped link normalization enabled
 ```
 
 **Front Matter Options:**
+- `disable`: Enable/disable SmartLink processing completely
 - `protectCodeBlocks`: Enable/disable code block protection
 - `normalizeEscapedWikilink`: Enable/disable escaped link normalization  
 - `maxCodeBlockIterations`: Set nested processing depth (1-50)
