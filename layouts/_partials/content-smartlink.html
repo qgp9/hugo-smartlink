@@ -23,6 +23,8 @@
     {{- .Content | safeHTML -}}
 {{- else if not (in $config.supportexts .File.Ext) -}}
     {{- .Content | safeHTML -}}
+{{- else if and (ne $config.output "html") (ne $config.output "markdown") -}}
+    {{- .Content | safeHTML -}}
 {{- else if not (in .Content "[[") -}}
     {{- .Content | safeHTML -}}
 {{- else -}}
