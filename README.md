@@ -9,6 +9,20 @@
 
 A Hugo module that provides **wiki link** functionality for Hugo static sites. This module automatically converts `[[wikilink]]` syntax into proper HTML links.
 
+## TL;DR
+
+```toml
+[module]
+[[module.imports]]
+  path = "github.com/qgp9/hugo-smartlink"
+```
+
+```markdown
+This links to [[my-page]] and [[About Us]].
+
+Or [[docs:guide/installation|Installation]] and [[JIRA:PROJ-123]].
+```
+
 ## What is Hugo SmartLink?
 
 Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki links** (also known as wikilinks or wiki-style links) in your Hugo content. It transforms `[[page-name]]` syntax into proper internal links, supporting both markdown and HTML output formats.
@@ -31,6 +45,7 @@ Hugo SmartLink is a powerful Hugo shortcode and partial that enables **wiki link
 <!-- omit from toc -->
 ## Table of Contents
 
+- [TL;DR](#tldr)
 - [What is Hugo SmartLink?](#what-is-hugo-smartlink)
   - [Key Features](#key-features)
 - [Installation](#installation)
