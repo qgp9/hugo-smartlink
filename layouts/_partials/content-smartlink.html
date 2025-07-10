@@ -7,6 +7,7 @@
     "prefixalias" dict
     "rules" slice
     "disable" false
+    "supportexts" (slice "md")
 -}}
 {{- $config := collections.Merge 
     $defaultConfig 
@@ -19,6 +20,8 @@
 
 {{- /* Check if SmartLink is disabled */ -}}
 {{- if $config.disable -}}
+    {{- .Content | safeHTML -}}
+{{- else if not (in $config.supportexts .File.Ext) -}}
     {{- .Content | safeHTML -}}
 {{- else if not (in .Content "[[") -}}
     {{- .Content | safeHTML -}}
@@ -75,4 +78,5 @@
     {{- end -}}
 
     {{- $content | safeHTML -}}
+    {{/*  DEBUG: {{ $config | jsonify }} EXT: {{ .File.Ext }}  */}}
 {{- end -}}

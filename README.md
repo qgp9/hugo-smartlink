@@ -150,6 +150,7 @@ Customize Hugo SmartLink behavior with `modules.smartlink` and `modules.smartlin
       output = "html"  # "html" (default) or "markdown"
       normalizeEscapedWikilink = true  # Normalize escaped wiki links for documentation
       disable = false  # Disable SmartLink processing globally
+      supportExts = ["md"]  # Supported file extensions for SmartLink processing
       [params.modules.smartlink.prefixAlias]
         "~" = "/doc/"
         "docs:" = "/documentation/"
@@ -361,6 +362,7 @@ This page will have code block protection and escaped link normalization enabled
 
 **Front Matter Options:**
 - `disable`: Enable/disable SmartLink processing completely
+- `supportExts`: Array of supported file extensions
 - `protectCodeBlocks`: Enable/disable code block protection
 - `normalizeEscapedWikilink`: Enable/disable escaped link normalization  
 - `maxCodeBlockIterations`: Set nested processing depth (1-50)

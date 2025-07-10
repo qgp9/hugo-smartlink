@@ -86,6 +86,10 @@ run_test() {
     
     # Extract lines with ||| pattern and verify each one
     while IFS= read -r line; do
+        # Print DEBUG lines as they are
+        if [[ "$line" == *"DEBUG"* ]]; then
+            echo "$line"
+        fi
         if [[ "$line" == *"|||"* ]]; then
             # Use sed to split by ||| and extract the parts
             local parts=$(echo "$line" | sed 's/|||/\n/g')

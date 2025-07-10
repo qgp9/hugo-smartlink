@@ -5,6 +5,8 @@
     # Output format for SmartLinks
     output = "html"
     disable = false
+    # Supported file extensions for SmartLink processing
+    supportExts = ["md"]
     # Normalize escaped wikilinks (e.g., \[\[link\]\] -> [[link]])
     normalizeEscapedWikilink = true
     protectCodeBlocks = false
