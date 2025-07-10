@@ -23,9 +23,17 @@
 {{- range $k, $v := $config.prefixalias -}}
     {{- $_prefixAliasKeys = $_prefixAliasKeys | append $k -}}
 {{- end -}}
+{{- $_prefixRule1 := dict
+    "name" "user"
+    "pattern" `^user:(.*)$`
+    "url" "/users/{1}"
+    "label" "/users/{1}"
+    -}}
 {{- $config = merge $config (dict 
     "_prefixaliaskeys" $_prefixAliasKeys 
     "_prefixesall" ($_prefixAliasKeys | append $config.stripnamespaceprefixes | append $config.usepagetitleprefixes | uniq)
+    "_prefixlabels" (slice | append $config.stripnamespaceprefixes | append $config.usepagetitleprefixes | uniq)
+    "_rulesarray" (slice (slice $_prefixRule1) $config.rules)
     ) -}}
 
 {{- .Store.Set "smartlink_config" $config -}}
